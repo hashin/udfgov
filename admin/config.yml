@@ -1,0 +1,40 @@
+backend:
+  name: git-gateway
+  branch: main
+
+# Drafts go through Netlify's editorial workflow: Draft -> In Review -> Ready,
+# then an editor clicks "Publish" to merge to main and trigger a deploy.
+publish_mode: editorial_workflow
+
+media_folder: "src/uploads"
+public_folder: "/uploads"
+
+site_url: https://www.udfgov.cc
+display_url: https://www.udfgov.cc
+
+collections:
+  - name: "initiatives"
+    label: "Initiatives & Achievements"
+    label_singular: "Initiative"
+    folder: "src/initiatives"
+    create: true
+    slug: "{{slug}}"
+    format: "frontmatter"
+    extension: "md"
+    fields:
+      - { label: "Layout", name: "layout", widget: "hidden", default: "initiative.njk" }
+      - { label: "Title", name: "title", widget: "string", hint: "Shown as the page heading and the WhatsApp/social link title." }
+      - label: "Poster image"
+        name: "poster"
+        widget: "image"
+        hint: "This becomes the hero image on the page AND the image shown when the link is shared on WhatsApp/social. Use a landscape image, ideally 1200x630px."
+      - label: "Summary"
+        name: "summary"
+        widget: "text"
+        hint: "One punchy sentence. Shown under the headline and as the WhatsApp/social preview text."
+      - label: "Category"
+        name: "category"
+        widget: "select"
+        options: ["Infrastructure", "Education", "Health", "Welfare", "Agriculture", "Economy", "Other"]
+      - { label: "Date", name: "date", widget: "datetime" }
+      - { label: "Body", name: "body", widget: "markdown" }

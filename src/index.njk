@@ -1,0 +1,27 @@
+---
+layout: base.njk
+title: UDF Kerala — Initiatives & Achievements
+description: A record of the initiatives and achievements of the UDF Government of Kerala.
+---
+<section class="hero-banner">
+  <h1>Initiatives &amp; Achievements</h1>
+  <p>A running record of what the UDF Government is delivering for Kerala.</p>
+</section>
+
+<section id="initiatives" class="grid">
+  {% for item in collections.initiatives %}
+  <a class="card" href="{{ item.url }}">
+    <div class="card-image">
+      <img src="{{ item.data.poster }}" alt="{{ item.data.title }}" loading="lazy">
+    </div>
+    <div class="card-body">
+      {% if item.data.category %}<span class="tag">{{ item.data.category }}</span>{% endif %}
+      <h2>{{ item.data.title }}</h2>
+      {% if item.data.summary %}<p>{{ item.data.summary }}</p>{% endif %}
+      {% if item.data.date %}<time datetime="{{ item.data.date | isoDate }}">{{ item.data.date | readableDate }}</time>{% endif %}
+    </div>
+  </a>
+  {% else %}
+  <p class="empty-state">No initiatives published yet. Content creators can add the first one via <a href="/admin/">/admin</a>.</p>
+  {% endfor %}
+</section>

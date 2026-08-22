@@ -1,0 +1,13 @@
+[build]
+  command = "npm run build"
+  publish = "_site"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Redirect bare apex to www, since the primary domain is www.udfgov.cc
+[[redirects]]
+  from = "https://udfgov.cc/*"
+  to = "https://www.udfgov.cc/:splat"
+  status = 301
+  force = true

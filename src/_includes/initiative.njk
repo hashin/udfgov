@@ -1,0 +1,46 @@
+---
+layout: base.njk
+ogType: article
+---
+<article class="initiative">
+  <div class="hero">
+    <img class="hero-image" src="{{ poster }}" alt="{{ title }}" loading="eager">
+  </div>
+
+  <div class="initiative-body">
+    <div class="initiative-meta">
+      {% if category %}<span class="tag">{{ category }}</span>{% endif %}
+      {% if date %}<time datetime="{{ date | isoDate }}">{{ date | readableDate }}</time>{% endif %}
+    </div>
+
+    <h1>{{ title }}</h1>
+    {% if summary %}<p class="lede">{{ summary }}</p>{% endif %}
+
+    <div class="prose">
+      {{ content | safe }}
+    </div>
+
+    <div class="share-bar">
+      <span class="share-label">Share this</span>
+      <a class="share-btn whatsapp" target="_blank" rel="noopener"
+         href="https://wa.me/?text={{ (title + ' — ' + site.url + page.url) | urlencode }}">WhatsApp</a>
+      <a class="share-btn twitter" target="_blank" rel="noopener"
+         href="https://twitter.com/intent/tweet?text={{ title | urlencode }}&url={{ (site.url + page.url) | urlencode }}">X</a>
+      <a class="share-btn facebook" target="_blank" rel="noopener"
+         href="https://www.facebook.com/sharer/sharer.php?u={{ (site.url + page.url) | urlencode }}">Facebook</a>
+      <button class="share-btn copy" type="button" data-copy-url="{{ site.url }}{{ page.url }}">Copy link</button>
+    </div>
+  </div>
+</article>
+
+<script>
+document.querySelectorAll('[data-copy-url]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    navigator.clipboard.writeText(btn.getAttribute('data-copy-url')).then(function () {
+      var original = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(function () { btn.textContent = original; }, 1500);
+    });
+  });
+});
+</script>

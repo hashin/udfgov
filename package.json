@@ -1,0 +1,16 @@
+{
+  "name": "udfgov",
+  "version": "1.0.0",
+  "private": true,
+  "description": "UDF Kerala initiatives & achievements wiki",
+  "scripts": {
+    "start": "eleventy --serve",
+    "build": "eleventy"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^2.0.1"
+  },
+  "dependencies": {
+    "luxon": "^3.4.4"
+  }
+}
