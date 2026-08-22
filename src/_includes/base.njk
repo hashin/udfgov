@@ -3,6 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+{% if site.gaId and not draft %}
+{# Google Analytics (GA4). ID comes from the GA_MEASUREMENT_ID env var --
+   see docs/SETUP.md. Skipped entirely on draft pages so review previews
+   don't pollute traffic data. #}
+<script async src="https://www.googletagmanager.com/gtag/js?id={{ site.gaId }}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', '{{ site.gaId }}', {
+    {% if ogType == "article" %}
+    content_type: "initiative",
+    {% if category %}content_category: {{ category | dump | safe }},{% endif %}
+    {% if ministry %}content_ministry: {{ ministry | dump | safe }},{% endif %}
+    {% if minister %}content_minister: {{ minister | dump | safe }},{% endif %}
+    {% elif ogType == "profile" %}
+    content_type: "minister_profile",
+    {% endif %}
+  });
+</script>
+{% endif %}
+
 <title>{{ title }}{% if title != site.title %} · {{ site.title }}{% endif %}</title>
 {% set pageDescription = description or summary or site.tagline %}
 {% set pageImage = image or poster or site.defaultImage %}

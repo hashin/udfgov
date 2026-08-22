@@ -65,6 +65,31 @@ After the first real article is published, test the OG image rendering with:
   shows up after re-publishing an article, it's usually a caching issue on the platform's side —
   re-run the Facebook debugger's "Scrape Again" to force a refresh.
 
+## 7. Set up Google Analytics (GA4)
+
+The site is fully wired for GA4 (pageviews, GA4's built-in enhanced measurement for scroll
+depth/outbound clicks/file downloads, plus custom `share` events on the WhatsApp/X/Facebook/copy
+buttons, and per-page dimensions for category/ministry/minister) — it just needs a Measurement
+ID, which only you can create since it requires a Google account:
+
+1. Go to [analytics.google.com](https://analytics.google.com) → Admin → **Create Property** →
+   name it (e.g. "UDF Kerala — udfgov.cc") → add a **Web** data stream for `https://www.udfgov.cc`
+2. Copy the **Measurement ID** shown (format `G-XXXXXXXXXX`)
+3. In Netlify → **Site configuration → Environment variables** → add `GA_MEASUREMENT_ID` with
+   that value, then trigger a redeploy (any push, or **Deploys → Trigger deploy**) — no code
+   change needed
+4. In GA4 → Admin → **Custom definitions** → **Create custom dimensions**, register these three
+   (event parameter name → dimension name), so the category/ministry/minister data actually
+   shows up in reports instead of just being sent and dropped:
+   - `content_category` → Category
+   - `content_ministry` → Ministry
+   - `content_minister` → Minister
+
+Draft pages never load the GA script at all (checked via the same `draft` flag that hides them
+from listings), so review previews don't pollute traffic data. The `share` event (Admin →
+Events) breaks down by `method` (whatsapp/twitter/facebook/copy_link) and `item_id` (the
+article's slug) — that's the actual "how far did this spread on WhatsApp" number.
+
 ## Content model reference
 
 Each article is a markdown file in `src/initiatives/` with this frontmatter (see

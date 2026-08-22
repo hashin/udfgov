@@ -22,18 +22,30 @@ ogType: article
 
     <div class="share-bar">
       <span class="share-label">Share this</span>
-      <a class="share-btn whatsapp" target="_blank" rel="noopener"
+      <a class="share-btn whatsapp" data-share-method="whatsapp" target="_blank" rel="noopener"
          href="https://wa.me/?text={{ (title + ' — ' + site.url + page.url) | urlencode }}">WhatsApp</a>
-      <a class="share-btn twitter" target="_blank" rel="noopener"
+      <a class="share-btn twitter" data-share-method="twitter" target="_blank" rel="noopener"
          href="https://twitter.com/intent/tweet?text={{ title | urlencode }}&url={{ (site.url + page.url) | urlencode }}">X</a>
-      <a class="share-btn facebook" target="_blank" rel="noopener"
+      <a class="share-btn facebook" data-share-method="facebook" target="_blank" rel="noopener"
          href="https://www.facebook.com/sharer/sharer.php?u={{ (site.url + page.url) | urlencode }}">Facebook</a>
-      <button class="share-btn copy" type="button" data-copy-url="{{ site.url }}{{ page.url }}">Copy link</button>
+      <button class="share-btn copy" data-share-method="copy_link" type="button" data-copy-url="{{ site.url }}{{ page.url }}">Copy link</button>
     </div>
   </div>
 </article>
 
 <script>
+document.querySelectorAll('[data-share-method]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    if (typeof gtag === 'function') {
+      gtag('event', 'share', {
+        method: btn.getAttribute('data-share-method'),
+        content_type: 'initiative',
+        item_id: {{ page.fileSlug | dump | safe }}
+      });
+    }
+  });
+});
+
 document.querySelectorAll('[data-copy-url]').forEach(function (btn) {
   btn.addEventListener('click', function () {
     navigator.clipboard.writeText(btn.getAttribute('data-copy-url')).then(function () {
