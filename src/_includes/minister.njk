@@ -1,0 +1,46 @@
+---
+layout: base.njk
+ogType: profile
+---
+{% set myInitiatives = collections.initiatives | byMinister(page.fileSlug) %}
+<article class="minister-profile">
+  <div class="minister-header">
+    {% if photo %}
+      <img class="minister-photo" src="{{ photo }}" alt="{{ name }}" loading="eager">
+    {% else %}
+      <div class="minister-photo minister-photo-placeholder" aria-hidden="true">{{ name | initials }}</div>
+    {% endif %}
+    <div class="minister-header-text">
+      <span class="tag">{{ designation }}</span>
+      <h1>{{ name }}</h1>
+      {% if portfolios %}<p class="minister-portfolios">{{ portfolios }}</p>{% endif %}
+      <p class="minister-meta">
+        {% if party %}{{ party }}{% endif %}{% if party and constituency %} &middot; {% endif %}{% if constituency %}{{ constituency }}{% endif %}
+      </p>
+    </div>
+  </div>
+
+  <section class="minister-initiatives">
+    <h2>Initiatives &amp; announcements</h2>
+    {% if myInitiatives.length %}
+    <div class="grid">
+      {% for item in myInitiatives %}
+      <a class="card" href="{{ item.url }}">
+        <div class="card-image">
+          <img src="{{ item.data.poster }}" alt="{{ item.data.title }}" loading="lazy">
+        </div>
+        <div class="card-body">
+          {% if item.data.category %}<span class="tag">{{ item.data.category }}</span>{% endif %}
+          <h2>{{ item.data.title }}</h2>
+          {% if item.data.date %}<time datetime="{{ item.data.date | isoDate }}">{{ item.data.date | readableDate }}</time>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">No initiatives linked to {{ name }} yet.</p>
+    {% endif %}
+  </section>
+
+  <p class="back-link"><a href="/ministers/">&larr; All ministers</a></p>
+</article>

@@ -1,0 +1,54 @@
+---
+layout: base.njk
+title: Archive — UDF Kerala
+description: All UDF Kerala initiatives and achievements, browsable by date and by ministry.
+---
+<section class="hero-banner">
+  <h1>Archive</h1>
+  <p>Browse every initiative by date or by ministry.</p>
+</section>
+
+<section class="archive-tabs">
+  <a href="#by-date" class="archive-tab-link">By date</a>
+  <a href="#by-ministry" class="archive-tab-link">By ministry</a>
+  <a href="/ministers/" class="archive-tab-link">By minister &rarr;</a>
+</section>
+
+<section id="by-date" class="archive-section">
+  <h2>By date</h2>
+  {% set grouped = collections.initiatives | groupByYearMonth %}
+  {% if grouped.length %}
+    {% for yearGroup in grouped %}
+    <div class="archive-year">
+      <h3>{{ yearGroup.year }}</h3>
+      {% for monthGroup in yearGroup.months %}
+      <div class="archive-month">
+        <h4>{{ monthGroup.monthLabel }} <span class="archive-count">({{ monthGroup.items.length }})</span></h4>
+        <ul class="archive-list">
+          {% for item in monthGroup.items %}
+          <li><a href="{{ item.url }}">{{ item.data.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  {% else %}
+  <p class="empty-state">No initiatives published yet.</p>
+  {% endif %}
+</section>
+
+<section id="by-ministry" class="archive-section">
+  <h2>By ministry</h2>
+  {% set ministryGroups = collections.initiatives | groupByMinistry %}
+  {% for group in ministryGroups %}
+  <div class="archive-month">
+    <h4>{{ group.ministry }} <span class="archive-count">({{ group.items.length }})</span></h4>
+    <ul class="archive-list">
+      {% for item in group.items %}
+      <li><a href="{{ item.url }}">{{ item.data.title }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+</section>

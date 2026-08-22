@@ -45,5 +45,52 @@ collections:
         name: "category"
         widget: "select"
         options: ["Infrastructure", "Education", "Health", "Welfare", "Agriculture", "Economy", "Other"]
+      - label: "Minister"
+        name: "minister"
+        widget: "relation"
+        collection: "ministers"
+        search_fields: ["name"]
+        display_fields: ["name"]
+        value_field: "{{slug}}"
+        hint: "The minister responsible for this initiative. Links this page from their profile on /ministers/."
+        required: false
+      - label: "Ministry / portfolio"
+        name: "ministry"
+        widget: "string"
+        hint: "The specific portfolio this falls under, e.g. \"Higher Education\" -- matters when a minister holds several portfolios."
+        required: false
       - { label: "Date", name: "date", widget: "datetime" }
       - { label: "Body", name: "body", widget: "markdown" }
+
+  - name: "ministers"
+    label: "Council of Ministers"
+    label_singular: "Minister"
+    folder: "src/ministers"
+    create: true
+    slug: "{{slug}}"
+    format: "frontmatter"
+    extension: "md"
+    fields:
+      - { label: "Layout", name: "layout", widget: "hidden", default: "minister.njk" }
+      - { label: "Name", name: "name", widget: "string", hint: "e.g. V. D. Satheesan" }
+      - label: "Designation"
+        name: "designation"
+        widget: "select"
+        options: ["Chief Minister", "Minister"]
+        default: "Minister"
+      - label: "Portfolios"
+        name: "portfolios"
+        widget: "string"
+        hint: "Comma-separated, e.g. \"Health and Family Welfare, Devaswom\""
+      - { label: "Party", name: "party", widget: "string", required: false }
+      - { label: "Constituency", name: "constituency", widget: "string", required: false }
+      - label: "Photo"
+        name: "photo"
+        widget: "image"
+        required: false
+        hint: "Use a verified, current official photo -- shows an initials placeholder until one is uploaded. Square, at least 400x400px works best."
+      - label: "Order"
+        name: "order"
+        widget: "number"
+        hint: "Controls listing order on /ministers/ -- Chief Minister should be 0, then ascending."
+        default: 99

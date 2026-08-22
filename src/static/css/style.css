@@ -202,3 +202,90 @@ img { max-width: 100%; display: block; }
   font-size: 0.85rem;
   font-weight: 600;
 }
+
+.hero-links { margin-top: 12px !important; font-size: 0.92rem !important; }
+.hero-links a { color: var(--navy); text-decoration: none; font-weight: 600; }
+.hero-links a:hover { text-decoration: underline; }
+
+/* Homepage month grouping */
+.month-group { max-width: var(--max-width); margin: 0 auto; padding: 0 20px; }
+.month-heading {
+  font-family: var(--font-display);
+  color: var(--navy-dark);
+  font-size: 1.3rem;
+  margin: 32px 0 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.month-group .grid { padding: 8px 0 12px; max-width: none; }
+
+/* Archive page */
+.archive-tabs {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 20px 20px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.archive-tab-link {
+  text-decoration: none;
+  color: var(--navy);
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.archive-tab-link:hover { text-decoration: underline; }
+
+.archive-section { max-width: var(--max-width); margin: 0 auto; padding: 0 20px 40px; }
+.archive-section h2 { color: var(--navy-dark); font-family: var(--font-display); }
+.archive-year h3 { color: var(--navy-dark); font-size: 1.5rem; margin: 28px 0 4px; }
+.archive-month { margin: 0 0 20px 12px; }
+.archive-month h4 { margin: 0 0 6px; color: var(--navy); font-size: 1.02rem; }
+.archive-count { color: var(--muted); font-weight: 400; font-size: 0.88rem; }
+.archive-list { margin: 0; padding-left: 20px; }
+.archive-list li { margin-bottom: 4px; }
+.archive-list a { color: inherit; text-decoration: none; }
+.archive-list a:hover { color: var(--navy); text-decoration: underline; }
+
+/* Ministers */
+.minister-grid { padding-top: 8px; }
+.minister-card { align-items: stretch; }
+.minister-card-photo, .minister-photo {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  background: var(--navy);
+}
+.minister-photo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.minister-profile { max-width: 760px; margin: 0 auto; padding: 32px 20px 60px; }
+.minister-header { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 40px; }
+.minister-header .minister-photo { width: 140px; height: 140px; border-radius: var(--radius); flex-shrink: 0; font-size: 2.2rem; }
+.minister-header-text h1 {
+  font-family: var(--font-display);
+  color: var(--navy-dark);
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  margin: 6px 0 8px;
+}
+.minister-portfolios { margin: 0 0 6px; color: var(--muted); font-size: 1rem; }
+.minister-meta { margin: 0; color: var(--muted); font-size: 0.88rem; }
+
+.minister-initiatives h2 { color: var(--navy-dark); font-family: var(--font-display); font-size: 1.3rem; }
+.minister-initiatives .grid { padding: 8px 0 0; max-width: none; }
+
+.back-link { margin-top: 40px; }
+.back-link a { color: var(--navy); text-decoration: none; font-weight: 600; }
+.back-link a:hover { text-decoration: underline; }
+
+@media (max-width: 540px) {
+  .minister-header { flex-direction: column; align-items: center; text-align: center; }
+}
