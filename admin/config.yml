@@ -2,9 +2,13 @@ backend:
   name: git-gateway
   branch: main
 
-# Drafts go through Netlify's editorial workflow: Draft -> In Review -> Ready,
-# then an editor clicks "Publish" to merge to main and trigger a deploy.
-publish_mode: editorial_workflow
+# Netlify's editorial_workflow (Draft -> In Review -> Ready) depends on GitHub's
+# Search API to list drafts, which Git Gateway blocks ("this part of GitHub's API
+# has been restricted") -- a hard incompatibility, not a config issue. So entries
+# publish directly, and review happens via the "Draft" field below instead: a
+# checked entry still builds but isn't linked from the site's public listings,
+# so an editor can review it at its direct URL before unchecking it to go live.
+publish_mode: simple
 
 media_folder: "src/uploads"
 public_folder: "/uploads"
@@ -23,6 +27,11 @@ collections:
     extension: "md"
     fields:
       - { label: "Layout", name: "layout", widget: "hidden", default: "initiative.njk" }
+      - label: "Draft (hide from public listings)"
+        name: "draft"
+        widget: "boolean"
+        default: true
+        hint: "Leave checked while writing/reviewing -- the page still builds so you can preview it by direct link, but it won't appear on the site's listing pages. Uncheck once an editor has reviewed it to make it public."
       - { label: "Title", name: "title", widget: "string", hint: "Shown as the page heading and the WhatsApp/social link title." }
       - label: "Poster image"
         name: "poster"

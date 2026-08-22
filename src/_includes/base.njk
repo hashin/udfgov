@@ -7,6 +7,7 @@
 {% set pageDescription = description or summary or site.tagline %}
 {% set pageImage = image or poster or site.defaultImage %}
 <meta name="description" content="{{ pageDescription }}">
+{% if draft %}<meta name="robots" content="noindex, nofollow">{% endif %}
 
 {# Open Graph / WhatsApp / Facebook link-preview tags — must use absolute URLs #}
 <meta property="og:type" content="{{ ogType or 'website' }}">
@@ -40,6 +41,10 @@
       <a href="/about/">About</a>
     </nav>
   </header>
+
+  {% if draft %}
+  <div class="draft-banner">Draft — not shown in public listings. Uncheck "Draft" in the CMS to publish.</div>
+  {% endif %}
 
   <main>
     {{ content | safe }}

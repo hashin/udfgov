@@ -6,9 +6,12 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy("src/uploads");
 
   eleventyConfig.addCollection("initiatives", (collectionApi) => {
-    return collectionApi.getFilteredByGlob("src/initiatives/*.md").sort((a, b) => {
-      return (b.data.date ? new Date(b.data.date) : 0) - (a.data.date ? new Date(a.data.date) : 0);
-    });
+    return collectionApi
+      .getFilteredByGlob("src/initiatives/*.md")
+      .filter((item) => !item.data.draft)
+      .sort((a, b) => {
+        return (b.data.date ? new Date(b.data.date) : 0) - (a.data.date ? new Date(a.data.date) : 0);
+      });
   });
 
   eleventyConfig.addFilter("readableDate", (dateObj) => {
