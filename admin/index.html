@@ -4,23 +4,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Content Admin — UDF Kerala</title>
-  <!-- Loaded synchronously, before decap-cms.js, and NOT deferred: this widget is what
-       detects #invite_token / #recovery_token in the URL and shows the "set password"
-       modal. If decap-cms.js runs first (e.g. via `defer` on this script), it can consume
-       the URL hash via its own internal identity handling before this ever sees it, and
-       the modal silently never appears. Order/timing here matters. -->
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-  <script>
-    if (window.netlifyIdentity) {
-      window.netlifyIdentity.on("init", (user) => {
-        if (!user) {
-          window.netlifyIdentity.on("login", () => {
-            document.location.href = "/admin/";
-          });
-        }
-      });
-    }
-  </script>
 </head>
 <body>
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>

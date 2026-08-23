@@ -1,6 +1,8 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: hashin/udfgov
   branch: main
+  base_url: https://www.udfgov.cc
 
 # Netlify's editorial_workflow (Draft -> In Review -> Ready) depends on GitHub's
 # Search API to list drafts, which Git Gateway blocks ("this part of GitHub's API
