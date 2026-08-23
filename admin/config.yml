@@ -34,6 +34,14 @@ collections:
     format: "frontmatter"
     extension: "md"
     preview_path: "initiatives/{{slug}}/"
+    sortable_fields: ["title", "date", "draft"]
+    view_filters:
+      - label: "Pending review"
+        field: draft
+        pattern: true
+      - label: "Published"
+        field: draft
+        pattern: false
     fields:
       - { label: "Layout", name: "layout", widget: "hidden", default: "initiative.njk" }
       - label: "Draft (hide from public listings)"
