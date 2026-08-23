@@ -9,7 +9,7 @@ ogType: article
 
   <div class="initiative-body">
     <div class="initiative-meta">
-      {% if category %}<span class="tag">{{ category }}</span>{% endif %}
+      {% if category %}<a class="tag tag-link" href="/category/{{ category | lower }}/">{{ category }}</a>{% endif %}
       {% if date %}<time datetime="{{ date | isoDate }}">{{ date | readableDate }}</time>{% endif %}
     </div>
 

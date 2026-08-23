@@ -1,0 +1,34 @@
+---
+layout: base.njk
+pagination:
+  data: categories
+  size: 1
+  alias: category
+permalink: "/category/{{ category | lower }}/"
+eleventyComputed:
+  title: "{{ category }} Initiatives"
+  description: "All UDF Kerala initiatives tagged {{ category }}."
+---
+<section class="hero-banner">
+  <h1>{{ category }}</h1>
+  <p>All initiatives tagged {{ category }}.</p>
+</section>
+
+<section class="grid">
+  {% set items = collections.initiatives | byCategory(category) %}
+  {% for item in items %}
+  <a class="card" href="{{ item.url }}">
+    <div class="card-image">
+      <img src="{{ item.data.poster }}" alt="{{ item.data.title }}" loading="lazy">
+    </div>
+    <div class="card-body">
+      {% if item.data.category %}<span class="tag">{{ item.data.category }}</span>{% endif %}
+      <h2>{{ item.data.title }}</h2>
+      {% if item.data.summary %}<p>{{ item.data.summary }}</p>{% endif %}
+      {% if item.data.date %}<time datetime="{{ item.data.date | isoDate }}">{{ item.data.date | readableDate }}</time>{% endif %}
+    </div>
+  </a>
+  {% else %}
+  <p class="empty-state">No initiatives tagged {{ category }} yet.</p>
+  {% endfor %}
+</section>

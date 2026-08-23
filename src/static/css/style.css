@@ -131,6 +131,8 @@ img { max-width: 100%; display: block; }
   padding: 4px 9px;
   border-radius: 999px;
 }
+.tag-link { text-decoration: none; cursor: pointer; transition: background 0.15s ease; }
+.tag-link:hover { background: rgba(23, 55, 94, 0.16); }
 
 .empty-state { color: var(--muted); grid-column: 1 / -1; }
 
