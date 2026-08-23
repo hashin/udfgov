@@ -346,3 +346,73 @@ img { max-width: 100%; display: block; }
 @media (max-width: 540px) {
   .minister-header { flex-direction: column; align-items: center; text-align: center; }
 }
+
+/* About page */
+.about-hero {
+  background: linear-gradient(160deg, var(--navy-dark), var(--navy));
+  color: #fff;
+  text-align: center;
+  padding: 72px 20px 64px;
+}
+.about-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin: 0 0 20px;
+}
+.about-lede {
+  max-width: 640px;
+  margin: 0 auto;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.about-section { padding: 64px 20px; }
+.about-section-alt { background: #eef1f5; }
+.about-section-inner { max-width: 800px; margin: 0 auto; }
+.about-section h2 {
+  font-family: var(--font-display);
+  color: var(--navy-dark);
+  font-size: clamp(1.5rem, 3.5vw, 1.9rem);
+  margin: 0 0 18px;
+}
+.about-section p {
+  font-size: 1.08rem;
+  line-height: 1.75;
+  color: var(--ink);
+}
+.about-section-alt p { max-width: 620px; }
+
+.about-cta { margin-top: 20px !important; font-size: 1rem !important; }
+.about-cta a { color: var(--navy); text-decoration: none; font-weight: 600; }
+.about-cta a:hover { text-decoration: underline; }
+
+.pillars-grid {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.pillar-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 20px;
+  border-top: 3px solid var(--accent);
+}
+.pillar-tag {
+  display: inline-block;
+  font-weight: 700;
+  color: var(--navy-dark);
+  font-size: 1.02rem;
+  margin-bottom: 8px;
+}
+.pillar-card p { font-size: 0.96rem; color: var(--muted); line-height: 1.6; margin: 0; }
+
+@media (max-width: 760px) {
+  .pillars-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .about-hero { padding: 56px 20px 48px; }
+  .pillars-grid { grid-template-columns: 1fr; }
+}
