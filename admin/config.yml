@@ -10,6 +10,14 @@ backend:
 # so an editor can review it at its direct URL before unchecking it to go live.
 publish_mode: simple
 
+# Most content creators write from a phone. Decap's default split-screen editor
+# (form + live preview side by side) squeezes each pane to near-unusable width on
+# a phone screen, so drop the preview pane entirely -- the form then gets the full
+# screen width. Nothing is lost: saving as a draft still gives a real preview link
+# (see the Draft field below).
+editor:
+  preview: false
+
 media_folder: "src/uploads"
 public_folder: "/uploads"
 
