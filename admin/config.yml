@@ -33,6 +33,7 @@ collections:
     slug: "{{year}}-{{month}}-{{day}}-{{hour}}{{minute}}{{second}}"
     format: "frontmatter"
     extension: "md"
+    preview_path: "initiatives/{{slug}}/"
     fields:
       - { label: "Layout", name: "layout", widget: "hidden", default: "initiative.njk" }
       - label: "Draft (hide from public listings)"
@@ -78,6 +79,7 @@ collections:
     slug: "{{slug}}"
     format: "frontmatter"
     extension: "md"
+    preview_path: "ministers/{{slug}}/"
     fields:
       - { label: "Layout", name: "layout", widget: "hidden", default: "minister.njk" }
       - { label: "Name", name: "name", widget: "string", hint: "e.g. V. D. Satheesan" }
