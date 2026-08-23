@@ -31,8 +31,12 @@ CMS at `/admin/` — no coding required on their end.
   server-side piece to keep the OAuth client secret off the browser; Cloudflare Pages
   Functions host it in the same project instead of a separate service.
 - **Domain**: `udfgov.cc`, registered at Spaceship. DNS: `www` is a CNAME to
-  `udfgov.pages.dev`; apex is an ALIAS/ANAME (or A fallback) to the same. DNS is
-  managed at Spaceship, not Cloudflare's own nameservers.
+  `udfgov.pages.dev` (verified/active). Apex (`udfgov.cc` bare) uses two A records
+  pointing at `172.66.47.16` and `172.66.44.240` — switched from ALIAS/ANAME to plain
+  A records mid-session because ALIAS never got past Cloudflare's verification; **as
+  of this writing the apex is still stuck on `pending` even with A records**, see Open
+  items. DNS is managed at Spaceship, not Cloudflare's own nameservers. DNSSEC is
+  enabled on the zone (see gotcha #5).
 
 ## Why it's on Cloudflare Pages and not Netlify
 
@@ -87,24 +91,29 @@ session.)*
 
 ## Analytics
 
-GA4 is fully wired (`src/_data/site.js` → `gaId`, sourced from a `GA_MEASUREMENT_ID`
-env var; event tracking on share buttons, category/ministry/minister dimensions;
-skipped entirely on draft pages) but **no GA4 property has been created yet** — the
-env var is unset, so no tracking is currently live. See `docs/SETUP.md` §7 for the
-exact steps (needs a Google account, can't be done via API).
+**GA4 is live** as of 2026-08-23. Property "UDF Kerala — udfgov.cc", Measurement ID
+`G-YCSDSR765B`, set as the `GA_MEASUREMENT_ID` GitHub Actions secret (read via
+`process.env` at build time in `src/_data/site.js` → `gaId`, baked into the static
+HTML — not a runtime var, so changing it needs a redeploy, e.g.
+`gh run rerun <latest-run-id> --repo hashin/udfgov`). Confirmed firing on live pages
+(checked `gtag('config', 'G-YCSDSR765B', {...})` renders with correct
+`content_category`/`content_minister` values in the page source). Skipped entirely on
+draft pages. Custom dimensions (`content_category`, `content_ministry`,
+`content_minister`) were registered by Hashin in GA4 → Admin → Custom definitions —
+**not independently verified from this session** (no GA4 API access); if reports look
+empty for these dimensions, check Realtime with a fresh pageview first before assuming
+something's broken.
 
 ## Where secrets live (values are NOT in this repo or doc)
 
-- **GitHub Actions secret** `CLOUDFLARE_API_TOKEN` — used by the deploy workflow.
+- **GitHub Actions secrets**: `CLOUDFLARE_API_TOKEN` (used by the deploy workflow),
+  `GA_MEASUREMENT_ID` (set, `G-YCSDSR765B` — build-time only, no need for a
+  Cloudflare runtime equivalent).
 - **Cloudflare Pages environment variables** (project `udfgov`, both
   production and preview): `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET` —
   used by the OAuth proxy Functions. The GitHub OAuth App itself lives at
   github.com/settings/developers under Hashin's account, named "UDF Kerala CMS",
   callback URL `https://www.udfgov.cc/callback`.
-- If `GA_MEASUREMENT_ID` gets set, it should go in **both** the GitHub Actions
-  secrets (the build step reads it via `process.env` at build time) — it doesn't need
-  to be a Cloudflare Pages runtime var since it's baked into the static HTML at
-  build time, not read per-request.
 
 ## Known gotchas already debugged (avoid re-discovering these)
 
@@ -124,7 +133,10 @@ exact steps (needs a Google account, can't be done via API).
    record not set"` even when DNS is demonstrably correct (checked against multiple
    public resolvers). Fix: DELETE the domain from the Pages project via the API and
    re-POST it — forces a fresh verification attempt instead of polling a stuck state.
-   Both `www` and apex needed this at least once.
+   Worked for `www` within ~10 minutes of a reset. The apex (`udfgov.cc` bare) has
+   needed **three** resets across a full session and switching from ALIAS/ANAME to
+   plain A records, and is *still* stuck pending as of this writing — this one might
+   need Cloudflare support or just more elapsed time, not more resets.
 4. **Cloudflare Pages env vars need a fresh deployment** to actually reach Functions
    at runtime — setting them via the API doesn't retroactively affect an
    already-deployed build.
@@ -134,9 +146,12 @@ exact steps (needs a Google account, can't be done via API).
 
 ## Open items
 
-- **Apex domain (`udfgov.cc`, no `www`) SSL/verification** — was stuck on `pending`
-  for hours; reset via delete+recreate at the end of this session, should resolve
-  within ~15-20 min of that reset. Check status before assuming it's broken again.
+- **Apex domain (`udfgov.cc`, no `www`) SSL/verification** — still `pending` after
+  three delete+recreate resets and switching DNS from ALIAS to A records
+  (`172.66.47.16`, `172.66.44.240`, confirmed resolving correctly at Spaceship). Not
+  a DNS problem at this point — likely needs either more elapsed time or Cloudflare
+  support. `www.udfgov.cc` is fully live and unaffected, so this only blocks the
+  bare/no-www URL specifically.
 - **Content creators**: `hashin` (owner) and `shamseer67-lab` (accepted) have access.
   Still need GitHub usernames (not just emails) for: `joshypx@hotmail.com`,
   `albinjosekumblani@gmail.com`, `tijokurian547@gmail.com`, `ajzalmuneem@gmail.com` —
@@ -144,7 +159,10 @@ exact steps (needs a Google account, can't be done via API).
   `gh api repos/hashin/udfgov/collaborators/<username> -X PUT -f permission=push`.
 - **Minister photos** — all 21 are placeholder initials. Needs verified official
   photos uploaded through `/admin/` → Council of Ministers → each entry → Photo field.
-- **GA4** — property not created yet (needs a Google account, see above).
+- **GA4 custom dimensions** — registered by Hashin in the GA4 UI
+  (`content_category`/`content_ministry`/`content_minister`), not independently
+  verified from this session (no API access to GA4). Confirm via Realtime reports if
+  in doubt.
 - **Old Netlify site** (`udfgov.netlify.app`) still exists but is unused/orphaned —
   could be deleted from the Netlify dashboard to avoid future confusion, not done.
 - **Sample/test content** — already cleaned up (`sample-initiative.md` removed), but
