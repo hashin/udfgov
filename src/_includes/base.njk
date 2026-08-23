@@ -77,5 +77,22 @@
   <footer class="site-footer">
     <p>&copy; {% year %} {{ site.title }}. Built to document the work of the UDF Government of Kerala.</p>
   </footer>
+
+  <!-- Netlify Identity's invite/recovery/confirmation emails link to the bare site URL
+       (this page), not /admin/ -- so the widget needs to live here too, not just on the
+       CMS page, or the #invite_token / #recovery_token in the link has nothing to catch
+       it and the "set password" modal never appears. On success, send them into the CMS. -->
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script>
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on("init", (user) => {
+        if (!user) {
+          window.netlifyIdentity.on("login", () => {
+            document.location.href = "/admin/";
+          });
+        }
+      });
+    }
+  </script>
 </body>
 </html>
