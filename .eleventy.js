@@ -50,6 +50,16 @@ module.exports = function (eleventyConfig) {
 
   eleventyConfig.addFilter("slice", (arr, start, end) => (arr || []).slice(start, end));
 
+  // Builds a "*bold title*\n\nsummary\n\nurl" share message. `summary` and
+  // `url` are each optional and omitted (with their separator) when blank —
+  // used for WhatsApp's full message and Facebook's `quote` param.
+  eleventyConfig.addFilter("shareText", (title, summary, url) => {
+    const parts = [`*${title}*`];
+    if (summary) parts.push(summary);
+    if (url) parts.push(url);
+    return parts.join("\n\n");
+  });
+
   // Groups initiatives into [{ year, months: [{ month, monthLabel, items }] }],
   // both levels sorted newest-first, for the /archive/ page.
   eleventyConfig.addFilter("groupByYearMonth", (initiatives) => {

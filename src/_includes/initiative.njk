@@ -23,11 +23,11 @@ ogType: article
     <div class="share-bar">
       <span class="share-label">Share this</span>
       <a class="share-btn whatsapp" data-share-method="whatsapp" target="_blank" rel="noopener"
-         href="https://wa.me/?text={{ (title + ' — ' + site.url + page.url) | urlencode }}">WhatsApp</a>
+         href="https://wa.me/?text={{ title | shareText(summary, site.url + page.url) | urlencode }}">WhatsApp</a>
       <a class="share-btn twitter" data-share-method="twitter" target="_blank" rel="noopener"
          href="https://twitter.com/intent/tweet?text={{ title | urlencode }}&url={{ (site.url + page.url) | urlencode }}">X</a>
       <a class="share-btn facebook" data-share-method="facebook" target="_blank" rel="noopener"
-         href="https://www.facebook.com/sharer/sharer.php?u={{ (site.url + page.url) | urlencode }}">Facebook</a>
+         href="https://www.facebook.com/sharer/sharer.php?u={{ (site.url + page.url) | urlencode }}&quote={{ title | shareText(summary) | urlencode }}">Facebook</a>
       <button class="share-btn copy" data-share-method="copy_link" type="button" data-copy-url="{{ site.url }}{{ page.url }}">Copy link</button>
     </div>
   </div>
