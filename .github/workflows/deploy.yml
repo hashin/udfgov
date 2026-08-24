@@ -17,6 +17,7 @@ jobs:
           node-version: 20
 
       - run: npm install
+      - run: npm run check-media-size
       - run: npm run build
         env:
           GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}

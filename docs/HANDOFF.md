@@ -49,6 +49,70 @@ migrated to Cloudflare Pages (genuinely free tier, no opaque credits system) sam
 **Netlify Identity/Git Gateway is gone** — don't reintroduce it; the `github` backend
 above is the replacement.
 
+## Image storage (currently in-repo, with a free migration path when needed)
+
+Poster images and inline body photos are uploaded through Decap's default GitHub-
+backend media picker straight into `src/uploads/` (`media_folder`/`public_folder`
+in `admin/config.yml`) and committed to this git repo like any other file — no
+separate media host. As of 2026-08-24 that's **15 files, 3.7 MB total, repo `.git`
+at 5.3 MB** — trivial, nowhere near a real limit.
+
+**Why this is fine for now, and what the actual ceilings are:**
+- GitHub's own guidance: individual files are hard-blocked only above 100 MiB
+  (warned above 50 MiB) — phone-camera JPEGs here run ~150–400 KB, a non-issue.
+  Total *repo* size is recommended to stay under 1 GB, "less than 5 GB strongly
+  recommended" — beyond that GitHub Support may reach out about the burden on
+  their infrastructure.
+- Cloudflare Pages hard-caps a deployment at **20,000 files total** (HTML pages +
+  images + everything else combined) — see the capacity analysis from
+  2026-08-24. At the images-per-article rates this site actually uses, that caps
+  out around 5,000–10,000 published articles, likely before the git-repo-size
+  guidance above becomes the binding constraint.
+- `npm run check-media-size` (wired into `.github/workflows/deploy.yml`, runs on
+  every deploy) measures `src/uploads` and emits a `::warning::` in the GitHub
+  Actions log — visible on the run's summary page, doesn't fail the build — if it
+  exceeds 250 MB or 3,000 files (see `scripts/check-media-size.js` for the exact
+  thresholds). That's deliberately early: ~25% of GitHub's "ideal" 1 GB repo size
+  and ~15% of Cloudflare's file cap, so there's real runway between the first
+  warning and an actual problem.
+
+**Why Cloudflare R2 is the migration target, not Git LFS, when that warning fires:**
+Git LFS looks like the obvious fix but its free tier (10 GB storage **and** 10 GB
+*bandwidth*/month) is bandwidth-metered per `git fetch`/checkout of LFS objects —
+every CI deploy re-checks-out the repo, so a handful of publishes a day against a
+few hundred MB of LFS-tracked images could burn through the monthly bandwidth
+allowance fast, silently disabling LFS (or billing, if a payment method's on file)
+until the next month. **Cloudflare R2's free tier has zero egress/bandwidth
+charges** (10 GB storage, 1M write + 10M read ops/month, no bandwidth cap at all)
+and is the same account/ecosystem this site is already hosted on. 10 GB covers
+roughly 25,000–40,000 images at this site's typical size — comfortably past the
+Cloudflare Pages 20,000-file ceiling above, so once migrated, images stop being a
+constraint at all.
+
+**Migration plan, to execute when `check-media-size` actually warns (not before —
+this is real engineering effort not justified by 3.7 MB of images):**
+1. Create an R2 bucket in the same Cloudflare account (`880b2687f3a93d5d8efd8e2f482287e0`)
+   and enable public access on it (either the built-in `r2.dev` bucket URL, or bind
+   a custom subdomain like `media.udfgov.cc` — the latter is cleaner for OG-image
+   URLs shared on WhatsApp/social).
+2. Decap CMS's default GitHub-backend media picker doesn't speak R2/S3 natively —
+   it needs a small custom media library (`CMS.registerMediaLibrary(...)` in
+   `admin/index.html`, same pattern already used for the YouTube editor
+   component) that uploads the selected file to R2 instead of committing it to
+   git. Since a browser can't hold R2 write credentials safely, uploads need to go
+   through a small Cloudflare Pages Function (same pattern as `functions/auth.js`)
+   that either proxies the upload or mints a short-lived presigned PUT URL.
+   `poster`/inline-image fields then store the resulting `media.udfgov.cc/...` URL
+   in frontmatter/markdown instead of a `/uploads/...` repo-relative path.
+3. Existing images already in `src/uploads/` can stay there (old articles keep
+   working via their existing repo-relative URLs) — only new uploads need to go to
+   R2, no bulk migration of history required unless repo size itself (not just
+   `src/uploads`) is the specific problem being solved.
+4. Update `src/_data/site.js`/templates only where they assume `/uploads/...` is
+   always repo-relative (the `og:image` tag in `base.njk` already prefixes with
+   `site.url`, so an absolute R2 URL in `poster` would need that prefix skipped —
+   check before shipping).
+
 ## Content model
 
 Two Decap CMS collections, both markdown files with frontmatter:

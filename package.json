@@ -5,7 +5,8 @@
   "description": "UDF Kerala initiatives & achievements wiki",
   "scripts": {
     "start": "eleventy --serve",
-    "build": "eleventy"
+    "build": "eleventy",
+    "check-media-size": "node scripts/check-media-size.js"
   },
   "devDependencies": {
     "@11ty/eleventy": "^2.0.1"
