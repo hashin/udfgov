@@ -287,8 +287,30 @@ img { max-width: 100%; display: block; }
 
 .share-btn.whatsapp { color: #1f9d55; border-color: #bfe8cf; }
 .share-btn.twitter { color: #1a1a1a; }
-.share-btn.facebook { color: #1877f2; border-color: #cfe0fb; }
+.share-btn.facebook, .share-btn.facebook-story { color: #1877f2; border-color: #cfe0fb; }
+.share-btn.instagram { color: #c1315b; border-color: #f3c9d7; }
 .share-btn.copy { color: var(--navy); }
+.share-btn:disabled { opacity: 0.7; cursor: default; }
+
+.share-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translate(-50%, 12px);
+  max-width: min(420px, calc(100vw - 32px));
+  background: var(--navy-dark);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  box-shadow: 0 12px 24px rgba(20, 30, 50, 0.25);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 100;
+  pointer-events: none;
+}
+.share-toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
 
 .site-footer {
   max-width: var(--max-width);
