@@ -48,6 +48,8 @@ module.exports = function (eleventyConfig) {
     return (initiatives || []).filter((item) => item.data.category === category);
   });
 
+  eleventyConfig.addFilter("slice", (arr, start, end) => (arr || []).slice(start, end));
+
   // Groups initiatives into [{ year, months: [{ month, monthLabel, items }] }],
   // both levels sorted newest-first, for the /archive/ page.
   eleventyConfig.addFilter("groupByYearMonth", (initiatives) => {

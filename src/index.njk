@@ -10,30 +10,62 @@ description: A record of the initiatives and achievements of the UDF Government 
 </section>
 
 <section id="initiatives">
-  {% set grouped = collections.initiatives | groupByYearMonth %}
-  {% if grouped.length %}
-    {% for yearGroup in grouped %}
-      {% for monthGroup in yearGroup.months %}
-      <div class="month-group">
-        <h2 class="month-heading">{{ monthGroup.monthLabel }} {{ yearGroup.year }}</h2>
-        <div class="grid">
-          {% for item in monthGroup.items %}
-          <a class="card" href="{{ item.url }}">
-            <div class="card-image">
-              <img src="{{ item.data.poster }}" alt="{{ item.data.title }}" loading="lazy">
-            </div>
-            <div class="card-body">
-              {% if item.data.category %}<span class="tag">{{ item.data.category }}</span>{% endif %}
-              <h2>{{ item.data.title }}</h2>
-              {% if item.data.summary %}<p>{{ item.data.summary }}</p>{% endif %}
-              {% if item.data.date %}<time datetime="{{ item.data.date | isoDate }}">{{ item.data.date | readableDate }}</time>{% endif %}
-            </div>
-          </a>
-          {% endfor %}
+  {% set visibleCount = 9 %}
+  {% set latest = collections.initiatives | slice(0, visibleCount) %}
+  {% set rest = collections.initiatives | slice(visibleCount) %}
+  {% if latest.length %}
+    <div class="grid">
+      {% for item in latest %}
+      <a class="card" href="{{ item.url }}">
+        <div class="card-image">
+          <img src="{{ item.data.poster }}" alt="{{ item.data.title }}" loading="lazy">
         </div>
-      </div>
+        <div class="card-body">
+          {% if item.data.category %}<span class="tag">{{ item.data.category }}</span>{% endif %}
+          <h2>{{ item.data.title }}</h2>
+          {% if item.data.summary %}<p>{{ item.data.summary }}</p>{% endif %}
+          {% if item.data.date %}<time datetime="{{ item.data.date | isoDate }}">{{ item.data.date | readableDate }}</time>{% endif %}
+        </div>
+      </a>
       {% endfor %}
-    {% endfor %}
+    </div>
+
+    {% if rest.length %}
+    <div id="more-initiatives" hidden>
+      {% set grouped = rest | groupByYearMonth %}
+      {% for yearGroup in grouped %}
+        {% for monthGroup in yearGroup.months %}
+        <div class="month-group">
+          <h2 class="month-heading">{{ monthGroup.monthLabel }} {{ yearGroup.year }}</h2>
+          <div class="grid">
+            {% for item in monthGroup.items %}
+            <a class="card" href="{{ item.url }}">
+              <div class="card-image">
+                <img src="{{ item.data.poster }}" alt="{{ item.data.title }}" loading="lazy">
+              </div>
+              <div class="card-body">
+                {% if item.data.category %}<span class="tag">{{ item.data.category }}</span>{% endif %}
+                <h2>{{ item.data.title }}</h2>
+                {% if item.data.summary %}<p>{{ item.data.summary }}</p>{% endif %}
+                {% if item.data.date %}<time datetime="{{ item.data.date | isoDate }}">{{ item.data.date | readableDate }}</time>{% endif %}
+              </div>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+    <div class="see-more-wrap">
+      <button id="see-more-btn" class="see-more-btn" type="button">See more initiatives</button>
+    </div>
+    <script>
+      document.getElementById('see-more-btn').addEventListener('click', function () {
+        document.getElementById('more-initiatives').hidden = false;
+        this.hidden = true;
+      });
+    </script>
+    {% endif %}
   {% else %}
   <p class="empty-state">No initiatives published yet. Content creators can add the first one via <a href="/admin/">/admin</a>.</p>
   {% endif %}
