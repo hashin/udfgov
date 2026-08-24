@@ -104,6 +104,18 @@ module.exports = function (eleventyConfig) {
 
   eleventyConfig.addShortcode("year", () => `${new Date().getFullYear()}`);
 
+  // Renders the `{% youtube "VIDEO_ID" %}` shortcode the CMS's custom
+  // "YouTube video" editor component writes into the markdown body (see
+  // admin/index.html) as a responsive embed. Markdown content is processed
+  // through Nunjucks before markdown-it (markdownTemplateEngine: "njk"),
+  // and markdown-it's default `html: true` passes this raw <div> through
+  // untouched, so it renders as a real embed rather than escaped text.
+  eleventyConfig.addShortcode("youtube", (id) => {
+    const cleanId = String(id || "").trim();
+    if (!cleanId) return "";
+    return `<div class="video-embed"><iframe src="https://www.youtube-nocookie.com/embed/${cleanId}" title="YouTube video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`;
+  });
+
   return {
     dir: {
       input: "src",

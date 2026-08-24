@@ -132,7 +132,10 @@ collections:
           - "Women & Child Development"
           - "Youth Affairs"
       - { label: "Date", name: "date", widget: "datetime" }
-      - { label: "Body", name: "body", widget: "markdown" }
+      - label: "Body"
+        name: "body"
+        widget: "markdown"
+        hint: "Use the image icon in the toolbar to add photos anywhere in the text. Use the \"+\" block-insert menu to add a \"YouTube video\" block -- paste the video's normal link or the embed code from YouTube's Share button."
 
   - name: "ministers"
     label: "Council of Ministers"

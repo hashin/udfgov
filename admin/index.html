@@ -7,5 +7,55 @@
 </head>
 <body>
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <script>
+    // Lets content creators embed a YouTube video from the "Body" markdown
+    // field's toolbar: paste a normal watch/share link, a youtu.be link, or
+    // the raw <iframe> embed code copied from YouTube's Share -> Embed
+    // dialog, and it's normalized down to a video ID stored in the markdown
+    // source as `{% youtube "VIDEO_ID" %}` -- rendered as a responsive embed
+    // by the matching Eleventy shortcode in .eleventy.js.
+    function extractYouTubeId(input) {
+      var s = String(input || "").trim();
+      if (!s) return "";
+      var iframeMatch = s.match(/<iframe[^>]*\ssrc=["']([^"']+)["']/i);
+      if (iframeMatch) s = iframeMatch[1];
+      var patterns = [
+        /youtu\.be\/([A-Za-z0-9_-]{11})/,
+        /youtube(?:-nocookie)?\.com\/embed\/([A-Za-z0-9_-]{11})/,
+        /youtube\.com\/shorts\/([A-Za-z0-9_-]{11})/,
+        /[?&]v=([A-Za-z0-9_-]{11})/,
+      ];
+      for (var i = 0; i < patterns.length; i++) {
+        var m = s.match(patterns[i]);
+        if (m) return m[1];
+      }
+      return /^[A-Za-z0-9_-]{11}$/.test(s) ? s : "";
+    }
+
+    CMS.registerEditorComponent({
+      id: "youtube",
+      label: "YouTube video",
+      fields: [
+        {
+          name: "url",
+          label: "YouTube link, or the embed code from Share → Embed",
+          widget: "string",
+        },
+      ],
+      pattern: /^{%\s*youtube\s*"([^"]*)"\s*%}$/,
+      fromBlock: function (match) {
+        return { url: match[1] };
+      },
+      toBlock: function (data) {
+        return '{% youtube "' + extractYouTubeId(data.url) + '" %}';
+      },
+      toPreview: function (data) {
+        var id = extractYouTubeId(data.url);
+        return id
+          ? '<img src="https://img.youtube.com/vi/' + id + '/hqdefault.jpg" alt="YouTube video preview" style="max-width:320px;border-radius:8px">'
+          : "Paste a YouTube link or embed code above";
+      },
+    });
+  </script>
 </body>
 </html>
