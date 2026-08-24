@@ -54,8 +54,11 @@ module.exports = function (eleventyConfig) {
   // `url` are each optional and omitted (with their separator) when blank —
   // used for WhatsApp's full message and Facebook's `quote` param.
   eleventyConfig.addFilter("shareText", (title, summary, url) => {
-    const parts = [`*${title}*`];
-    if (summary) parts.push(summary);
+    // WhatsApp only renders *bold* when the asterisk touches a non-space
+    // character, so a title with stray leading/trailing whitespace (some
+    // CMS entries have it) silently breaks the formatting.
+    const parts = [`*${(title || "").trim()}*`];
+    if (summary) parts.push(summary.trim());
     if (url) parts.push(url);
     return parts.join("\n\n");
   });
