@@ -1,21 +1,26 @@
 ---
 layout: base.njk
-title: UDF Kerala — Initiatives & Achievements
-description: A record of the initiatives and achievements of the UDF Government of Kerala.
+pagination:
+  data: collections.initiatives
+  size: 9
+  alias: items
+permalink: "{{ '/' if pagination.pageNumber == 0 else '/page/' + (pagination.pageNumber + 1) + '/' }}"
+eleventyComputed:
+  title: "{{ 'UDF Kerala — Initiatives & Achievements' if pagination.pageNumber == 0 else 'Initiatives — page ' + (pagination.pageNumber + 1) }}"
+  description: "A record of the initiatives and achievements of the UDF Government of Kerala."
 ---
+{% if pagination.pageNumber == 0 %}
 <section class="hero-banner">
   <h1>Initiatives &amp; Achievements</h1>
   <p>A running record of what the UDF Government is delivering for Kerala.</p>
   <p class="hero-links"><a href="/archive/">Browse the full archive by date or ministry &rarr;</a> &middot; <a href="/ministers/">Council of Ministers &rarr;</a></p>
 </section>
+{% endif %}
 
 <section id="initiatives">
-  {% set visibleCount = 9 %}
-  {% set latest = collections.initiatives | slice(0, visibleCount) %}
-  {% set rest = collections.initiatives | slice(visibleCount) %}
-  {% if latest.length %}
+  {% if items.length %}
     <div class="grid">
-      {% for item in latest %}
+      {% for item in items %}
       <a class="card" href="{{ item.url }}">
         <div class="card-image">
           <img src="{{ item.data.poster }}" alt="{{ item.data.title }}" loading="lazy">
@@ -30,41 +35,11 @@ description: A record of the initiatives and achievements of the UDF Government 
       {% endfor %}
     </div>
 
-    {% if rest.length %}
-    <div id="more-initiatives" hidden>
-      {% set grouped = rest | groupByYearMonth %}
-      {% for yearGroup in grouped %}
-        {% for monthGroup in yearGroup.months %}
-        <div class="month-group">
-          <h2 class="month-heading">{{ monthGroup.monthLabel }} {{ yearGroup.year }}</h2>
-          <div class="grid">
-            {% for item in monthGroup.items %}
-            <a class="card" href="{{ item.url }}">
-              <div class="card-image">
-                <img src="{{ item.data.poster }}" alt="{{ item.data.title }}" loading="lazy">
-              </div>
-              <div class="card-body">
-                {% if item.data.category %}<span class="tag">{{ item.data.category }}</span>{% endif %}
-                <h2>{{ item.data.title }}</h2>
-                {% if item.data.summary %}<p>{{ item.data.summary }}</p>{% endif %}
-                {% if item.data.date %}<time datetime="{{ item.data.date | isoDate }}">{{ item.data.date | readableDate }}</time>{% endif %}
-              </div>
-            </a>
-            {% endfor %}
-          </div>
-        </div>
-        {% endfor %}
-      {% endfor %}
-    </div>
+    {% if pagination.href.previous or pagination.href.next %}
     <div class="see-more-wrap">
-      <button id="see-more-btn" class="see-more-btn" type="button">See more initiatives</button>
+      {% if pagination.href.previous %}<a class="see-more-btn see-more-btn-secondary" href="{{ pagination.href.previous }}">&larr; Newer</a>{% endif %}
+      {% if pagination.href.next %}<a class="see-more-btn" href="{{ pagination.href.next }}">See more initiatives &rarr;</a>{% endif %}
     </div>
-    <script>
-      document.getElementById('see-more-btn').addEventListener('click', function () {
-        document.getElementById('more-initiatives').hidden = false;
-        this.hidden = true;
-      });
-    </script>
     {% endif %}
   {% else %}
   <p class="empty-state">No initiatives published yet. Content creators can add the first one via <a href="/admin/">/admin</a>.</p>

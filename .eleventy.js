@@ -1,23 +1,87 @@
 const { DateTime } = require("luxon");
+const slugify = require("@sindresorhus/slugify");
+
+// Groups initiatives into [{ year, total, months: [{ month, monthLabel, items }] }],
+// both levels sorted newest-first. Shared by the /archive/ overview (which
+// only needs year + total for its index) and the one-page-per-year
+// /archive/<year>/ pagination (which needs the full month breakdown) --
+// splitting by year keeps each archive page's size bounded by a single
+// year's content instead of the site's entire history.
+function groupByYearMonth(initiatives) {
+  const years = new Map();
+  for (const item of initiatives || []) {
+    if (!item.data.date) continue;
+    const dt = DateTime.fromJSDate(new Date(item.data.date), { zone: "utc" });
+    const year = dt.year;
+    const month = dt.month;
+    if (!years.has(year)) years.set(year, new Map());
+    const months = years.get(year);
+    if (!months.has(month)) months.set(month, { month, monthLabel: dt.toFormat("LLLL"), items: [] });
+    months.get(month).items.push(item);
+  }
+  return Array.from(years.keys())
+    .sort((a, b) => b - a)
+    .map((year) => {
+      const months = Array.from(years.get(year).values()).sort((a, b) => b.month - a.month);
+      return { year, total: months.reduce((sum, m) => sum + m.items.length, 0), months };
+    });
+}
+
+// Groups initiatives into [{ ministry, slug, items }], ministries alphabetical,
+// items without a ministry set are grouped under "Unassigned" at the end.
+// Powers the one-page-per-ministry /archive/ministry/<slug>/ pagination, so
+// a single ministry's full history never has to share a page with every
+// other ministry's.
+function groupByMinistry(initiatives) {
+  const groups = new Map();
+  for (const item of initiatives || []) {
+    const key = (item.data.ministry || "").trim() || "Unassigned";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(item);
+  }
+  const keys = Array.from(groups.keys()).sort((a, b) => {
+    if (a === "Unassigned") return 1;
+    if (b === "Unassigned") return -1;
+    return a.localeCompare(b);
+  });
+  return keys.map((ministry) => ({ ministry, slug: slugify(ministry), items: groups.get(ministry) }));
+}
+
+// Shared by every collection below that needs "all published initiatives,
+// newest first" -- keeps the sort/filter logic (and its date-fallback
+// behavior) in one place instead of copy-pasted per collection.
+function getPublishedInitiatives(collectionApi) {
+  return collectionApi
+    .getFilteredByGlob("src/initiatives/*.md")
+    .filter((item) => !item.data.draft)
+    .sort((a, b) => {
+      return (b.data.date ? new Date(b.data.date) : 0) - (a.data.date ? new Date(a.data.date) : 0);
+    });
+}
 
 module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/static": "static" });
   eleventyConfig.addPassthroughCopy({ admin: "admin" });
   eleventyConfig.addPassthroughCopy("src/uploads");
 
-  eleventyConfig.addCollection("initiatives", (collectionApi) => {
-    return collectionApi
-      .getFilteredByGlob("src/initiatives/*.md")
-      .filter((item) => !item.data.draft)
-      .sort((a, b) => {
-        return (b.data.date ? new Date(b.data.date) : 0) - (a.data.date ? new Date(a.data.date) : 0);
-      });
-  });
+  eleventyConfig.addCollection("initiatives", (collectionApi) => getPublishedInitiatives(collectionApi));
 
   eleventyConfig.addCollection("ministers", (collectionApi) => {
     return collectionApi
       .getFilteredByGlob("src/ministers/*.md")
       .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+  });
+
+  // One entry per year, each holding that year's month/item breakdown --
+  // paginated (size: 1) by src/archive-year.njk into /archive/<year>/.
+  eleventyConfig.addCollection("initiativesByYear", (collectionApi) => {
+    return groupByYearMonth(getPublishedInitiatives(collectionApi));
+  });
+
+  // One entry per ministry -- paginated (size: 1) by src/archive-ministry.njk
+  // into /archive/ministry/<slug>/.
+  eleventyConfig.addCollection("ministryArchive", (collectionApi) => {
+    return groupByMinistry(getPublishedInitiatives(collectionApi));
   });
 
   eleventyConfig.addFilter("readableDate", (dateObj) => {
@@ -48,8 +112,6 @@ module.exports = function (eleventyConfig) {
     return (initiatives || []).filter((item) => item.data.category === category);
   });
 
-  eleventyConfig.addFilter("slice", (arr, start, end) => (arr || []).slice(start, end));
-
   // Builds a "*bold title*\n\nsummary\n\nurl" share message. `summary` and
   // `url` are each optional and omitted (with their separator) when blank —
   // used for WhatsApp's full message and Facebook's `quote` param.
@@ -61,45 +123,6 @@ module.exports = function (eleventyConfig) {
     if (summary) parts.push(summary.trim());
     if (url) parts.push(url);
     return parts.join("\n\n");
-  });
-
-  // Groups initiatives into [{ year, months: [{ month, monthLabel, items }] }],
-  // both levels sorted newest-first, for the /archive/ page.
-  eleventyConfig.addFilter("groupByYearMonth", (initiatives) => {
-    const years = new Map();
-    for (const item of initiatives || []) {
-      if (!item.data.date) continue;
-      const dt = DateTime.fromJSDate(new Date(item.data.date), { zone: "utc" });
-      const year = dt.year;
-      const month = dt.month;
-      if (!years.has(year)) years.set(year, new Map());
-      const months = years.get(year);
-      if (!months.has(month)) months.set(month, { month, monthLabel: dt.toFormat("LLLL"), items: [] });
-      months.get(month).items.push(item);
-    }
-    return Array.from(years.keys())
-      .sort((a, b) => b - a)
-      .map((year) => ({
-        year,
-        months: Array.from(years.get(year).values()).sort((a, b) => b.month - a.month),
-      }));
-  });
-
-  // Groups initiatives into [{ ministry, items }], ministries alphabetical,
-  // items without a ministry set are grouped under "Unassigned" at the end.
-  eleventyConfig.addFilter("groupByMinistry", (initiatives) => {
-    const groups = new Map();
-    for (const item of initiatives || []) {
-      const key = (item.data.ministry || "").trim() || "Unassigned";
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key).push(item);
-    }
-    const keys = Array.from(groups.keys()).sort((a, b) => {
-      if (a === "Unassigned") return 1;
-      if (b === "Unassigned") return -1;
-      return a.localeCompare(b);
-    });
-    return keys.map((ministry) => ({ ministry, items: groups.get(ministry) }));
   });
 
   eleventyConfig.addShortcode("year", () => `${new Date().getFullYear()}`);

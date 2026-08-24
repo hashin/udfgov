@@ -1,0 +1,28 @@
+---
+layout: base.njk
+pagination:
+  data: collections.initiativesByYear
+  size: 1
+  alias: yearGroup
+permalink: "/archive/{{ yearGroup.year }}/"
+eleventyComputed:
+  title: "{{ yearGroup.year }} archive — UDF Kerala"
+  description: "All UDF Kerala initiatives published in {{ yearGroup.year }}."
+---
+<section class="hero-banner">
+  <h1>{{ yearGroup.year }}</h1>
+  <p><a href="/archive/">&larr; All years</a></p>
+</section>
+
+<section class="archive-section">
+  {% for monthGroup in yearGroup.months %}
+  <div class="archive-month">
+    <h4>{{ monthGroup.monthLabel }} <span class="archive-count">({{ monthGroup.items.length }})</span></h4>
+    <ul class="archive-list">
+      {% for item in monthGroup.items %}
+      <li><a href="{{ item.url }}">{{ item.data.title }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+</section>

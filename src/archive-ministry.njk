@@ -1,0 +1,23 @@
+---
+layout: base.njk
+pagination:
+  data: collections.ministryArchive
+  size: 1
+  alias: group
+permalink: "/archive/ministry/{{ group.slug }}/"
+eleventyComputed:
+  title: "{{ group.ministry }} archive — UDF Kerala"
+  description: "All UDF Kerala initiatives under {{ group.ministry }}."
+---
+<section class="hero-banner">
+  <h1>{{ group.ministry }}</h1>
+  <p><a href="/archive/">&larr; All ministries</a></p>
+</section>
+
+<section class="archive-section">
+  <ul class="archive-list">
+    {% for item in group.items %}
+    <li><a href="{{ item.url }}">{{ item.data.title }}</a>{% if item.data.date %} <span class="archive-count">&mdash; {{ item.data.date | readableDate }}</span>{% endif %}</li>
+    {% endfor %}
+  </ul>
+</section>
