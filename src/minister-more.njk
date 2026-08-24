@@ -1,21 +1,21 @@
 ---
 layout: base.njk
+ogType: profile
 pagination:
-  data: collections.categoryPages
+  data: collections.ministerOverflowPages
   size: 1
   alias: entry
 permalink: "{{ entry.url }}"
 eleventyComputed:
-  title: "{{ entry.category }} initiatives{{ ' — page ' + (entry.pageNumber + 1) if entry.pageNumber > 0 }}"
-  description: "All UDF Kerala initiatives tagged {{ entry.category }}."
+  title: "{{ entry.minister.data.name }} — more initiatives — UDF Kerala"
+  description: "More UDF Kerala initiatives linked to {{ entry.minister.data.name }}."
 ---
 <section class="hero-banner">
-  <h1>{{ entry.category }}</h1>
-  <p>All initiatives tagged {{ entry.category }}.</p>
+  <h1>{{ entry.minister.data.name }}</h1>
+  <p><a href="/ministers/{{ entry.minister.fileSlug }}/">&larr; Back to profile</a></p>
 </section>
 
 <section id="initiatives">
-  {% if entry.items.length %}
   <div class="grid">
     {% for item in entry.items %}
     <a class="card" href="{{ item.url }}">
@@ -25,19 +25,16 @@ eleventyComputed:
       <div class="card-body">
         {% if item.data.category %}<span class="tag">{{ item.data.category }}</span>{% endif %}
         <h2>{{ item.data.title }}</h2>
-        {% if item.data.summary %}<p>{{ item.data.summary }}</p>{% endif %}
         {% if item.data.date %}<time datetime="{{ item.data.date | isoDate }}">{{ item.data.date | readableDate }}</time>{% endif %}
       </div>
     </a>
     {% endfor %}
   </div>
+
   {% if entry.prevUrl or entry.nextUrl %}
   <div class="see-more-wrap">
     {% if entry.prevUrl %}<a class="see-more-btn see-more-btn-secondary" href="{{ entry.prevUrl }}">&larr; Newer</a>{% endif %}
     {% if entry.nextUrl %}<a class="see-more-btn" href="{{ entry.nextUrl }}">See more initiatives &rarr;</a>{% endif %}
   </div>
-  {% endif %}
-  {% else %}
-  <p class="empty-state">No initiatives tagged {{ entry.category }} yet.</p>
   {% endif %}
 </section>

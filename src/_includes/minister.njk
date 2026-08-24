@@ -2,7 +2,8 @@
 layout: base.njk
 ogType: profile
 ---
-{% set myInitiatives = collections.initiatives | byMinister(page.fileSlug) %}
+{% set allMyInitiatives = collections.initiatives | byMinister(page.fileSlug) %}
+{% set myInitiatives = allMyInitiatives | slice(0, 9) %}
 <article class="minister-profile">
   <div class="minister-header">
     {% if photo %}
@@ -37,6 +38,11 @@ ogType: profile
       </a>
       {% endfor %}
     </div>
+    {% if allMyInitiatives.length > myInitiatives.length %}
+    <div class="see-more-wrap">
+      <a class="see-more-btn" href="/ministers/{{ page.fileSlug }}/page/2/">See more initiatives &rarr;</a>
+    </div>
+    {% endif %}
     {% else %}
     <p class="empty-state">No initiatives linked to {{ name }} yet.</p>
     {% endif %}

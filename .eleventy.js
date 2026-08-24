@@ -1,5 +1,6 @@
 const { DateTime } = require("luxon");
 const slugify = require("@sindresorhus/slugify");
+const categories = require("./src/_data/categories.js");
 
 // Groups initiatives into [{ year, total, months: [{ month, monthLabel, items }] }],
 // both levels sorted newest-first. Shared by the /archive/ overview (which
@@ -59,6 +60,30 @@ function getPublishedInitiatives(collectionApi) {
     });
 }
 
+// How many initiative cards a minister/category page shows before handing
+// off to a "page 2" continuation -- kept as one constant so the profile/
+// category page (which renders the first chunk directly) and the
+// collections below (which compute the overflow chunks) agree on where
+// page 1 ends.
+const CARDS_PER_PAGE = 9;
+
+// Splits `items` into chunks of `pageSize`, returning one entry per chunk:
+// { items, pageNumber (0-based), url, prevUrl, nextUrl }. `urlForPage(i)`
+// (0-based) gives that chunk's URL; `firstPrevUrl` is the "previous" link
+// for chunk 0 (null by default -- pass e.g. a minister's own profile URL
+// when chunk 0 is really the *second* page of that listing).
+function buildPagedChunks(items, pageSize, urlForPage, firstPrevUrl = null) {
+  const chunks = [];
+  for (let i = 0; i < items.length; i += pageSize) chunks.push(items.slice(i, i + pageSize));
+  return chunks.map((pageItems, i) => ({
+    items: pageItems,
+    pageNumber: i,
+    url: urlForPage(i),
+    prevUrl: i > 0 ? urlForPage(i - 1) : firstPrevUrl,
+    nextUrl: i + 1 < chunks.length ? urlForPage(i + 1) : null,
+  }));
+}
+
 module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/static": "static" });
   eleventyConfig.addPassthroughCopy({ admin: "admin" });
@@ -82,6 +107,46 @@ module.exports = function (eleventyConfig) {
   // into /archive/ministry/<slug>/.
   eleventyConfig.addCollection("ministryArchive", (collectionApi) => {
     return groupByMinistry(getPublishedInitiatives(collectionApi));
+  });
+
+  // One entry per (category, page-of-CARDS_PER_PAGE) -- paginated (size: 1)
+  // by src/category.njk. Page 0 of each category lives at /category/<name>/
+  // (unchanged URL); overflow continues at /category/<name>/page/2/, etc.,
+  // instead of ever-growing on a single page.
+  eleventyConfig.addCollection("categoryPages", (collectionApi) => {
+    const initiatives = getPublishedInitiatives(collectionApi);
+    const pages = [];
+    for (const category of categories) {
+      const slug = category.toLowerCase();
+      const mine = initiatives.filter((item) => item.data.category === category);
+      const urlForPage = (i) => (i === 0 ? `/category/${slug}/` : `/category/${slug}/page/${i + 1}/`);
+      const chunks = mine.length
+        ? buildPagedChunks(mine, CARDS_PER_PAGE, urlForPage)
+        : [{ items: [], pageNumber: 0, url: urlForPage(0), prevUrl: null, nextUrl: null }];
+      for (const chunk of chunks) pages.push({ category, ...chunk });
+    }
+    return pages;
+  });
+
+  // One entry per (minister, overflow page) for initiatives beyond the
+  // first CARDS_PER_PAGE shown directly on a minister's own profile page
+  // (src/_includes/minister.njk) -- paginated (size: 1) by
+  // src/minister-more.njk into /ministers/<slug>/page/2/, /page/3/, etc.
+  // Ministers with CARDS_PER_PAGE or fewer initiatives get no entries here,
+  // since their profile page already shows everything.
+  eleventyConfig.addCollection("ministerOverflowPages", (collectionApi) => {
+    const initiatives = getPublishedInitiatives(collectionApi);
+    const ministers = collectionApi.getFilteredByGlob("src/ministers/*.md");
+    const pages = [];
+    for (const minister of ministers) {
+      const slug = minister.fileSlug;
+      const overflow = initiatives.filter((item) => item.data.minister === slug).slice(CARDS_PER_PAGE);
+      if (!overflow.length) continue;
+      const urlForPage = (i) => `/ministers/${slug}/page/${i + 2}/`;
+      const chunks = buildPagedChunks(overflow, CARDS_PER_PAGE, urlForPage, `/ministers/${slug}/`);
+      for (const chunk of chunks) pages.push({ minister, ...chunk });
+    }
+    return pages;
   });
 
   eleventyConfig.addFilter("readableDate", (dateObj) => {
@@ -108,9 +173,7 @@ module.exports = function (eleventyConfig) {
     return (initiatives || []).filter((item) => item.data.minister === ministerSlug);
   });
 
-  eleventyConfig.addFilter("byCategory", (initiatives, category) => {
-    return (initiatives || []).filter((item) => item.data.category === category);
-  });
+  eleventyConfig.addFilter("slice", (arr, start, end) => (arr || []).slice(start, end));
 
   // Builds a "*bold title*\n\nsummary\n\nurl" share message. `summary` and
   // `url` are each optional and omitted (with their separator) when blank —
