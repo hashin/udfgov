@@ -231,6 +231,31 @@ img { max-width: 100%; display: block; }
   border-left: 3px solid var(--accent);
 }
 
+.tag-opinion { background: rgba(217, 122, 43, 0.12); color: var(--accent); }
+
+.opinion-byline {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 20px;
+}
+.opinion-byline strong { color: var(--ink); font-style: normal; }
+.opinion-byline a { color: var(--navy); }
+
+.opinion-disclaimer {
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 0 0 28px;
+}
+
+.card-byline { font-size: 0.85rem; color: var(--muted); font-style: italic; margin: 0; }
+
 .prose {
   font-size: 1.08rem;
   line-height: 1.85;

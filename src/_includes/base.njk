@@ -15,7 +15,7 @@
   gtag('js', new Date());
   gtag('config', '{{ site.gaId }}', {
     {% if ogType == "article" %}
-    content_type: "initiative",
+    content_type: "{{ gaContentType or 'initiative' }}",
     {% if category %}content_category: {{ category | dump | safe }},{% endif %}
     {% if ministry %}content_ministry: {{ ministry | dump | safe }},{% endif %}
     {% if minister %}content_minister: {{ minister | dump | safe }},{% endif %}
@@ -62,6 +62,7 @@
       <a href="/">Home</a>
       <a href="/archive/">Archive</a>
       <a href="/ministers/">Ministers</a>
+      <a href="/opinion/">Opinion</a>
       <a href="/about/">About</a>
     </nav>
   </header>

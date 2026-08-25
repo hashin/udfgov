@@ -137,6 +137,65 @@ collections:
         widget: "markdown"
         hint: "Use the image icon in the toolbar to add photos anywhere in the text. Use the \"+\" block-insert menu to add a \"YouTube video\" block -- paste the video's normal link or the embed code from YouTube's Share button."
 
+  - name: "opinions"
+    label: "Opinion"
+    label_singular: "Opinion piece"
+    folder: "src/opinion"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{hour}}{{minute}}{{second}}"
+    format: "frontmatter"
+    extension: "md"
+    preview_path: "opinion/{{slug}}/"
+    sortable_fields: ["title", "date", "draft"]
+    view_filters:
+      - label: "Pending review"
+        field: draft
+        pattern: true
+      - label: "Published"
+        field: draft
+        pattern: false
+    fields:
+      - { label: "Layout", name: "layout", widget: "hidden", default: "opinion.njk" }
+      - label: "Draft (hide from public listings)"
+        name: "draft"
+        widget: "boolean"
+        default: true
+        hint: "Leave checked while writing/reviewing -- the page still builds so you can preview it by direct link, but it won't appear on the site's listing pages. Uncheck once an editor has reviewed it to make it public."
+      - { label: "Title", name: "title", widget: "string", hint: "Shown as the page heading and the WhatsApp/social link title." }
+      - label: "Author"
+        name: "author"
+        widget: "string"
+        hint: "The person who wrote this piece -- not a UDF Kerala staff byline."
+      - label: "Author handle / role"
+        name: "authorHandle"
+        widget: "string"
+        required: false
+        hint: "Optional, e.g. \"@username\" or \"Political commentator\" -- shown next to the author's name."
+      - label: "Originally posted on"
+        name: "sourcePlatform"
+        widget: "select"
+        required: false
+        options: ["Facebook", "X (Twitter)", "Instagram", "WhatsApp", "Blog", "Other"]
+        hint: "Where this piece was originally shared, if it was republished from social media or elsewhere."
+      - label: "Link to original post"
+        name: "sourceUrl"
+        widget: "string"
+        required: false
+        hint: "Link to the original post -- shown as an attribution link so credit goes back to the author."
+      - label: "Poster image"
+        name: "poster"
+        widget: "image"
+        hint: "This becomes the hero image on the page AND the image shown when the link is shared on WhatsApp/social. Use a landscape image, ideally 1200x630px."
+      - label: "Summary"
+        name: "summary"
+        widget: "text"
+        hint: "One punchy sentence. Shown under the headline and as the WhatsApp/social preview text."
+      - { label: "Date", name: "date", widget: "datetime" }
+      - label: "Body"
+        name: "body"
+        widget: "markdown"
+        hint: "Use the image icon in the toolbar to add photos anywhere in the text. Use the \"+\" block-insert menu to add a \"YouTube video\" block -- paste the video's normal link or the embed code from YouTube's Share button."
+
   - name: "ministers"
     label: "Council of Ministers"
     label_singular: "Minister"

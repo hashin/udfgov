@@ -60,6 +60,20 @@ function getPublishedInitiatives(collectionApi) {
     });
 }
 
+// Shared by every collection below that needs "all published opinion
+// pieces, newest first" -- mirrors getPublishedInitiatives above, kept
+// separate since opinions are a distinct content type (external authors'
+// pieces republished from social media/elsewhere, not official
+// government announcements) with their own collection and fields.
+function getPublishedOpinions(collectionApi) {
+  return collectionApi
+    .getFilteredByGlob("src/opinion/*.md")
+    .filter((item) => !item.data.draft)
+    .sort((a, b) => {
+      return (b.data.date ? new Date(b.data.date) : 0) - (a.data.date ? new Date(a.data.date) : 0);
+    });
+}
+
 // How many initiative cards a minister/category page shows before handing
 // off to a "page 2" continuation -- kept as one constant so the profile/
 // category page (which renders the first chunk directly) and the
@@ -90,6 +104,23 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy("src/uploads");
 
   eleventyConfig.addCollection("initiatives", (collectionApi) => getPublishedInitiatives(collectionApi));
+
+  eleventyConfig.addCollection("opinions", (collectionApi) => getPublishedOpinions(collectionApi));
+
+  // One entry per page-of-CARDS_PER_PAGE -- paginated (size: 1) by
+  // src/opinion.njk into /opinion/, /opinion/page/2/, etc. Built the same
+  // way as categoryPages below (rather than a raw `pagination: {data:
+  // collections.opinions}` block) because Eleventy's built-in pagination
+  // silently produces zero pages -- not one page with zero items -- when
+  // the source array is empty, which /opinion/ starts out as before the
+  // first piece is published.
+  eleventyConfig.addCollection("opinionPages", (collectionApi) => {
+    const opinions = getPublishedOpinions(collectionApi);
+    const urlForPage = (i) => (i === 0 ? "/opinion/" : `/opinion/page/${i + 1}/`);
+    return opinions.length
+      ? buildPagedChunks(opinions, CARDS_PER_PAGE, urlForPage)
+      : [{ items: [], pageNumber: 0, url: urlForPage(0), prevUrl: null, nextUrl: null }];
+  });
 
   eleventyConfig.addCollection("ministers", (collectionApi) => {
     return collectionApi

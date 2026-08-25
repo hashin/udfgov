@@ -1,0 +1,38 @@
+---
+layout: base.njk
+ogType: article
+gaContentType: opinion
+---
+{% from "share-bar.njk" import render as shareBar %}
+<article class="initiative opinion">
+  <div class="hero">
+    <img class="hero-image" src="{{ poster }}" alt="{{ title }}" loading="eager">
+  </div>
+
+  <div class="initiative-body">
+    <div class="initiative-meta">
+      <span class="tag tag-opinion">Opinion</span>
+      {% if date %}<time datetime="{{ date | isoDate }}">{{ date | readableDate }}</time>{% endif %}
+    </div>
+
+    <h1>{{ title }}</h1>
+
+    <p class="opinion-byline">
+      By <strong>{{ author }}</strong>{% if authorHandle %} &middot; {{ authorHandle }}{% endif %}
+      {% if sourcePlatform or sourceUrl %}
+        <br>
+        {% if sourceUrl %}Originally posted on <a href="{{ sourceUrl }}" target="_blank" rel="noopener">{{ sourcePlatform or "the original platform" }}</a>{% elif sourcePlatform %}Originally posted on {{ sourcePlatform }}{% endif %}
+      {% endif %}
+    </p>
+
+    {% if summary %}<p class="lede">{{ summary }}</p>{% endif %}
+
+    <p class="opinion-disclaimer">This is an opinion piece by an external author, shared here for readers -- it does not represent an official statement or position of the UDF Government of Kerala.</p>
+
+    <div class="prose">
+      {{ content | safe }}
+    </div>
+
+    {{ shareBar(title, summary, site.url + page.url, site.url + poster, 'opinion', page.fileSlug, site.whatsappChannelPromo) }}
+  </div>
+</article>

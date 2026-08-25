@@ -1,0 +1,127 @@
+{# Shared "Share this" bar for any article-like page (initiative or opinion
+   piece). Takes fully-resolved values so it doesn't depend on the caller's
+   ambient template variables -- note that includes `site`: Nunjucks macros
+   imported via `{% from %}` don't see Eleventy's global data either, so
+   whatsappPromo is passed explicitly rather than read as `site.x` in here.
+   title, summary, url (absolute page URL), posterUrl (absolute image URL),
+   contentType (for GA's `content_type`, e.g. "initiative"/"opinion"),
+   itemId (for GA's `item_id`, e.g. the page's fileSlug), whatsappPromo
+   (site.whatsappChannelPromo, appended below the link in the WhatsApp
+   message only). #}
+{% macro render(title, summary, url, posterUrl, contentType, itemId, whatsappPromo) %}
+<div class="share-bar">
+  <span class="share-label">Share this</span>
+  <a class="share-btn whatsapp" data-share-method="whatsapp" target="_blank" rel="noopener"
+     href="https://wa.me/?text={{ ((title | shareText(summary, url)) + '\n\n' + whatsappPromo) | urlencode }}">WhatsApp</a>
+  <a class="share-btn twitter" data-share-method="twitter" target="_blank" rel="noopener"
+     href="https://twitter.com/intent/tweet?text={{ title | urlencode }}&url={{ url | urlencode }}">X</a>
+  <a class="share-btn facebook" data-share-method="facebook" target="_blank" rel="noopener"
+     href="https://www.facebook.com/sharer/sharer.php?u={{ url | urlencode }}&quote={{ title | shareText(summary) | urlencode }}">Facebook</a>
+  <button class="share-btn instagram" data-share-method="instagram" type="button"
+     data-app-share data-share-title="{{ title }}" data-share-summary="{{ summary }}"
+     data-share-url="{{ url }}" data-share-image="{{ posterUrl }}"
+     data-share-target="Instagram">Instagram</button>
+  <button class="share-btn facebook-story" data-share-method="facebook_story" type="button"
+     data-app-share data-share-title="{{ title }}" data-share-summary="{{ summary }}"
+     data-share-url="{{ url }}" data-share-image="{{ posterUrl }}"
+     data-share-target="Facebook Story">Facebook Story</button>
+  <button class="share-btn copy" data-share-method="copy_link" type="button" data-copy-url="{{ url }}">Copy link</button>
+</div>
+
+<script>
+document.querySelectorAll('[data-share-method]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    if (typeof gtag === 'function') {
+      gtag('event', 'share', {
+        method: btn.getAttribute('data-share-method'),
+        content_type: {{ contentType | dump | safe }},
+        item_id: {{ itemId | dump | safe }}
+      });
+    }
+  });
+});
+
+document.querySelectorAll('[data-copy-url]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    navigator.clipboard.writeText(btn.getAttribute('data-copy-url')).then(function () {
+      flashButtonText(btn, 'Copied!');
+    });
+  });
+});
+
+function flashButtonText(btn, message, duration) {
+  var original = btn.textContent;
+  btn.textContent = message;
+  btn.disabled = true;
+  setTimeout(function () {
+    btn.textContent = original;
+    btn.disabled = false;
+  }, duration || 1500);
+}
+
+function showToast(message) {
+  var existing = document.querySelector('.share-toast');
+  if (existing) existing.remove();
+  var toast = document.createElement('div');
+  toast.className = 'share-toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  requestAnimationFrame(function () { toast.classList.add('is-visible'); });
+  setTimeout(function () {
+    toast.classList.remove('is-visible');
+    setTimeout(function () { toast.remove(); }, 300);
+  }, 4000);
+}
+
+// Instagram has no public "share to post/story" web link at all, and
+// Facebook's only has one for feed posts (used by the plain Facebook
+// button above) -- Stories on both platforms are native-app-only, gated
+// behind a Meta Developer App + an iOS-only, unofficial pasteboard deep
+// link that Meta can break anytime. Rather than build on that, this uses
+// the standard Web Share API so the OS's own share sheet hands the image
+// off to whichever app (and Story vs. feed) the person picks there --
+// works on effectively all modern mobile browsers. Where it's unsupported
+// (mainly desktop), it falls back to copying the caption and opening the
+// image in a new tab so the photo can be saved and shared manually.
+document.querySelectorAll('[data-app-share]').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var title = btn.getAttribute('data-share-title');
+    var summary = btn.getAttribute('data-share-summary');
+    var url = btn.getAttribute('data-share-url');
+    var imageUrl = btn.getAttribute('data-share-image');
+    var target = btn.getAttribute('data-share-target');
+    var caption = [title, summary, url].filter(Boolean).join('\n\n');
+
+    function fallback() {
+      window.open(imageUrl, '_blank', 'noopener');
+      navigator.clipboard.writeText(caption).then(function () {
+        flashButtonText(btn, 'Caption copied!', 2500);
+        showToast('Caption copied, and the photo opened in a new tab — save it, then paste the caption into your ' + target + '.');
+      }, function () {
+        showToast('The photo opened in a new tab — save it, then write your own caption in ' + target + '.');
+      });
+    }
+
+    if (!navigator.share) {
+      fallback();
+      return;
+    }
+
+    fetch(imageUrl)
+      .then(function (res) { return res.blob(); })
+      .then(function (blob) {
+        var file = new File([blob], 'udfgov-share.jpg', { type: blob.type || 'image/jpeg' });
+        var shareData = { title: title, text: caption, files: [file] };
+        if (navigator.canShare && !navigator.canShare(shareData)) {
+          fallback();
+          return;
+        }
+        return navigator.share(shareData).catch(function (err) {
+          if (err && err.name !== 'AbortError') fallback();
+        });
+      })
+      .catch(fallback);
+  });
+});
+</script>
+{% endmacro %}

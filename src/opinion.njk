@@ -1,0 +1,47 @@
+---
+layout: base.njk
+pagination:
+  data: collections.opinionPages
+  size: 1
+  alias: entry
+permalink: "{{ entry.url }}"
+eleventyComputed:
+  title: "{{ 'Opinion — UDF Kerala' if entry.pageNumber == 0 else 'Opinion — page ' + (entry.pageNumber + 1) }}"
+  description: "Opinion pieces and commentary from writers across social media and elsewhere, shared for readers."
+---
+{% if entry.pageNumber == 0 %}
+<section class="hero-banner">
+  <h1>Opinion</h1>
+  <p>Perspectives and commentary from writers, shared on social media and elsewhere -- not official statements from the UDF Government.</p>
+</section>
+{% endif %}
+
+<section id="opinions">
+  {% if entry.items.length %}
+    <div class="grid">
+      {% for item in entry.items %}
+      <a class="card" href="{{ item.url }}">
+        <div class="card-image">
+          <img src="{{ item.data.poster }}" alt="{{ item.data.title }}" loading="lazy">
+        </div>
+        <div class="card-body">
+          <span class="tag tag-opinion">Opinion</span>
+          <h2>{{ item.data.title }}</h2>
+          {% if item.data.summary %}<p>{{ item.data.summary }}</p>{% endif %}
+          <p class="card-byline">By {{ item.data.author }}</p>
+          {% if item.data.date %}<time datetime="{{ item.data.date | isoDate }}">{{ item.data.date | readableDate }}</time>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    {% if entry.prevUrl or entry.nextUrl %}
+    <div class="see-more-wrap">
+      {% if entry.prevUrl %}<a class="see-more-btn see-more-btn-secondary" href="{{ entry.prevUrl }}">&larr; Newer</a>{% endif %}
+      {% if entry.nextUrl %}<a class="see-more-btn" href="{{ entry.nextUrl }}">See more opinion pieces &rarr;</a>{% endif %}
+    </div>
+    {% endif %}
+  {% else %}
+  <p class="empty-state">No opinion pieces published yet. Content creators can add the first one via <a href="/admin/">/admin</a>.</p>
+  {% endif %}
+</section>
