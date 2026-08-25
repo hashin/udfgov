@@ -23,7 +23,7 @@ eleventyComputed:
       {% for item in items %}
       <a class="card" href="{{ item.url }}">
         <div class="card-image">
-          <img src="{{ item.data.poster }}" alt="{{ item.data.title }}" loading="lazy">
+          {% responsiveImage item.data.poster, item.data.title, [340, 680], "(min-width: 1080px) 331px, (min-width: 600px) 45vw, 92vw", "lazy" %}
         </div>
         <div class="card-body">
           {% if item.data.category %}<span class="tag">{{ item.data.category }}</span>{% endif %}

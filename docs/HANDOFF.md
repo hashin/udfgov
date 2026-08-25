@@ -68,6 +68,12 @@ at 5.3 MB** — trivial, nowhere near a real limit.
   2026-08-24. At the images-per-article rates this site actually uses, that caps
   out around 5,000–10,000 published articles, likely before the git-repo-size
   guidance above becomes the binding constraint.
+  - **Updated 2026-08-26**: `responsiveImage` (below) generates ~2–5 extra WebP
+    files per unique poster/photo (on top of the original upload, which is
+    still passed through as-is for `og:image`/`twitter:image`), so that ceiling
+    is really more like **2,500–4,000 articles** now, not 5,000–10,000. Still
+    years of headroom at this site's actual publishing pace, but worth
+    re-checking this estimate again if that pace changes a lot.
 - `npm run check-media-size` (wired into `.github/workflows/deploy.yml`, runs on
   every deploy) measures `src/uploads` and emits a `::warning::` in the GitHub
   Actions log — visible on the run's summary page, doesn't fail the build — if it
@@ -112,6 +118,23 @@ this is real engineering effort not justified by 3.7 MB of images):**
    always repo-relative (the `og:image` tag in `base.njk` already prefixes with
    `site.url`, so an absolute R2 URL in `poster` would need that prefix skipped —
    check before shipping).
+
+**Image optimization (added 2026-08-26):** posters/photos are no longer served
+at their original upload size everywhere they appear. `.eleventy.js`'s
+`responsiveImage` Nunjucks shortcode (wraps `@11ty/eleventy-img`) resizes and
+re-encodes each one to WebP at the specific widths each spot actually needs --
+small for grid-card thumbnails, larger for an article's hero image -- and
+outputs a `srcset`/`sizes`-driven `<img>` so the browser picks the right one.
+Deliberately WebP-only (no JPEG/PNG fallback): the extra format would double
+the generated file count for marginal benefit, given WebP's near-universal
+support and the Cloudflare Pages 20,000-file cap noted above. `og:image`/
+`twitter:image` still point at the *original* upload, not an optimized
+variant -- intentional, since social platforms fetch and cache that once
+themselves rather than it being re-downloaded per visitor. Falls back to a
+plain `<img>` (original file, unoptimized) if a source file is missing or
+processing fails for any reason, so a bad reference can't fail the build.
+Inline images pasted into an article's markdown body are **not** run through
+this -- only template-controlled images (posters, minister photos) are.
 
 ## Content model
 

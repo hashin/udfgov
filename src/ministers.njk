@@ -12,7 +12,7 @@ description: The UDF Government of Kerala's Council of Ministers and their portf
   {% for m in collections.ministers %}
   <a class="card minister-card" href="{{ m.url }}">
     {% if m.data.photo %}
-      <img class="minister-card-photo" src="{{ m.data.photo }}" alt="{{ m.data.name }}" loading="lazy">
+      {% responsiveImage m.data.photo, m.data.name, [340, 680], "(min-width: 1080px) 331px, (min-width: 600px) 45vw, 92vw", "lazy", "minister-card-photo" %}
     {% else %}
       <div class="minister-card-photo minister-photo-placeholder" aria-hidden="true">{{ m.data.name | initials }}</div>
     {% endif %}

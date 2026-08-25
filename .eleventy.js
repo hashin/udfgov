@@ -1,6 +1,19 @@
 const { DateTime } = require("luxon");
 const slugify = require("@sindresorhus/slugify");
+const path = require("path");
+const eleventyImage = require("@11ty/eleventy-img");
 const categories = require("./src/_data/categories.js");
+
+// Maps a public URL path (as stored in frontmatter -- "/uploads/x.jpeg" or
+// "/static/images/x.png") back to the actual file on disk, so
+// responsiveImage below can hand eleventy-img a real path. Returns null for
+// anything else (e.g. an already-absolute external URL), in which case the
+// shortcode falls back to a plain unoptimized <img>.
+function resolveImagePath(src) {
+  if (src.startsWith("/uploads/")) return path.join(__dirname, "src", "uploads", path.basename(src));
+  if (src.startsWith("/static/")) return path.join(__dirname, "src", src.slice(1));
+  return null;
+}
 
 // Groups initiatives into [{ year, total, months: [{ month, monthLabel, items }] }],
 // both levels sorted newest-first. Shared by the /archive/ overview (which
@@ -235,6 +248,52 @@ module.exports = function (eleventyConfig) {
   });
 
   eleventyConfig.addShortcode("year", () => `${new Date().getFullYear()}`);
+
+  // Resizes/re-encodes a local image (poster, minister photo, etc.) into a
+  // <picture> with WebP + JPEG/PNG sources at the given widths, so a card
+  // thumbnail no longer ships the same full-size upload as the article's
+  // hero image. `widths` and `sizes` should roughly match how large the
+  // image actually renders in that spot (see call sites for the values
+  // used for card grids vs. hero images vs. minister photos). Falls back
+  // to a plain <img> for anything eleventy-img can't process -- a
+  // non-local src, a missing file, or any other processing error -- so a
+  // bad reference degrades gracefully instead of failing the build.
+  eleventyConfig.addNunjucksAsyncShortcode(
+    "responsiveImage",
+    async function (src, alt, widths, sizes, loading, className) {
+      const classAttr = className ? ` class="${className}"` : "";
+      const fallback = () =>
+        `<img${classAttr} src="${src}" alt="${String(alt || "").replace(/"/g, "&quot;")}" loading="${loading || "lazy"}">`;
+      if (!src) return "";
+      const inputPath = resolveImagePath(src);
+      if (!inputPath) return fallback();
+      try {
+        // WebP only, deliberately no JPEG/PNG fallback: WebP support is
+        // effectively universal on the mobile browsers this site's
+        // WhatsApp-driven audience actually uses, and each extra format
+        // doubles the file count -- Cloudflare Pages caps a deployment at
+        // 20,000 files total (see docs/HANDOFF.md), so that multiplier
+        // matters more here than marginal legacy-browser safety.
+        const metadata = await eleventyImage.default(inputPath, {
+          widths: widths || [400, 800],
+          formats: ["webp"],
+          outputDir: "_site/static/img/",
+          urlPath: "/static/img/",
+        });
+        const htmlOptions = {
+          alt: alt || "",
+          sizes: sizes || "100vw",
+          loading: loading || "lazy",
+          decoding: "async",
+        };
+        if (className) htmlOptions.class = className;
+        return eleventyImage.generateHTML(metadata, htmlOptions);
+      } catch (err) {
+        console.warn(`responsiveImage: couldn't optimize ${src} (${err.message}), using original`);
+        return fallback();
+      }
+    }
+  );
 
   // Renders the `{% youtube "VIDEO_ID" %}` shortcode the CMS's custom
   // "YouTube video" editor component writes into the markdown body (see
