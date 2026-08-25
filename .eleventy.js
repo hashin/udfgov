@@ -249,18 +249,23 @@ module.exports = function (eleventyConfig) {
 
   eleventyConfig.addShortcode("year", () => `${new Date().getFullYear()}`);
 
-  // Resizes/re-encodes a local image (poster, minister photo, etc.) into a
-  // <picture> with WebP + JPEG/PNG sources at the given widths, so a card
-  // thumbnail no longer ships the same full-size upload as the article's
-  // hero image. `widths` and `sizes` should roughly match how large the
-  // image actually renders in that spot (see call sites for the values
-  // used for card grids vs. hero images vs. minister photos). Falls back
-  // to a plain <img> for anything eleventy-img can't process -- a
+  // Resizes/re-encodes a local image (poster, minister photo, etc.) to a
+  // single WebP at `width`, so a card thumbnail no longer ships the same
+  // full-size upload as the article's hero image. One width per call site
+  // (not a srcset of several) is a deliberate simplification: the vast
+  // majority of the byte savings here come from WebP + right-sizing away
+  // from the original upload's huge dimensions, not from also matching
+  // every viewport exactly -- and each extra width/format is another
+  // generated file, which counts against Cloudflare Pages' 20,000-file
+  // deployment cap (see docs/HANDOFF.md). `width` should roughly match how
+  // large the image actually renders in that spot (see call sites for the
+  // values used for card grids vs. hero images vs. minister photos). Falls
+  // back to a plain <img> for anything eleventy-img can't process -- a
   // non-local src, a missing file, or any other processing error -- so a
   // bad reference degrades gracefully instead of failing the build.
   eleventyConfig.addNunjucksAsyncShortcode(
     "responsiveImage",
-    async function (src, alt, widths, sizes, loading, className) {
+    async function (src, alt, width, loading, className) {
       const classAttr = className ? ` class="${className}"` : "";
       const fallback = () =>
         `<img${classAttr} src="${src}" alt="${String(alt || "").replace(/"/g, "&quot;")}" loading="${loading || "lazy"}">`;
@@ -268,21 +273,14 @@ module.exports = function (eleventyConfig) {
       const inputPath = resolveImagePath(src);
       if (!inputPath) return fallback();
       try {
-        // WebP only, deliberately no JPEG/PNG fallback: WebP support is
-        // effectively universal on the mobile browsers this site's
-        // WhatsApp-driven audience actually uses, and each extra format
-        // doubles the file count -- Cloudflare Pages caps a deployment at
-        // 20,000 files total (see docs/HANDOFF.md), so that multiplier
-        // matters more here than marginal legacy-browser safety.
         const metadata = await eleventyImage.default(inputPath, {
-          widths: widths || [400, 800],
+          widths: [width || 600],
           formats: ["webp"],
           outputDir: "_site/static/img/",
           urlPath: "/static/img/",
         });
         const htmlOptions = {
           alt: alt || "",
-          sizes: sizes || "100vw",
           loading: loading || "lazy",
           decoding: "async",
         };

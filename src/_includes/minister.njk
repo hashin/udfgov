@@ -28,7 +28,7 @@ ogType: profile
 <article class="minister-profile">
   <div class="minister-header">
     {% if photo %}
-      {% responsiveImage photo, name, [140, 280], "140px", "eager", "minister-photo" %}
+      {% responsiveImage photo, name, 280, "eager", "minister-photo" %}
     {% else %}
       <div class="minister-photo minister-photo-placeholder" aria-hidden="true">{{ name | initials }}</div>
     {% endif %}
@@ -49,7 +49,7 @@ ogType: profile
       {% for item in myInitiatives %}
       <a class="card" href="{{ item.url }}">
         <div class="card-image">
-          {% responsiveImage item.data.poster, item.data.title, [340, 680], "(min-width: 1080px) 331px, (min-width: 600px) 45vw, 92vw", "lazy" %}
+          {% responsiveImage item.data.poster, item.data.title, 500, "lazy" %}
         </div>
         <div class="card-body">
           {% if item.data.category %}<span class="tag">{{ item.data.category }}</span>{% endif %}

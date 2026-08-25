@@ -68,11 +68,16 @@ at 5.3 MB** — trivial, nowhere near a real limit.
   2026-08-24. At the images-per-article rates this site actually uses, that caps
   out around 5,000–10,000 published articles, likely before the git-repo-size
   guidance above becomes the binding constraint.
-  - **Updated 2026-08-26**: `responsiveImage` (below) generates ~2–5 extra WebP
-    files per unique poster/photo (on top of the original upload, which is
-    still passed through as-is for `og:image`/`twitter:image`), so that ceiling
-    is really more like **2,500–4,000 articles** now, not 5,000–10,000. Still
-    years of headroom at this site's actual publishing pace, but worth
+  - **Updated 2026-08-26**: `responsiveImage` (below) generates 1 extra WebP
+    file per unique poster/photo per place it's used at a different size (in
+    practice 1-2: one for its card thumbnail, one for its hero image if it has
+    one), on top of the original upload, which is still passed through as-is
+    for `og:image`/`twitter:image`. That's a small enough multiplier that the
+    5,000–10,000 estimate above still roughly holds. (An earlier version of
+    this generated a `srcset` of 2-3 widths per spot instead of one fixed
+    size, which would have cut that estimate roughly in half -- simplified
+    back down to one width per call site since the extra file cost wasn't
+    worth the marginal byte savings.) Still
     re-checking this estimate again if that pace changes a lot.
 - `npm run check-media-size` (wired into `.github/workflows/deploy.yml`, runs on
   every deploy) measures `src/uploads` and emits a `::warning::` in the GitHub
@@ -122,12 +127,17 @@ this is real engineering effort not justified by 3.7 MB of images):**
 **Image optimization (added 2026-08-26):** posters/photos are no longer served
 at their original upload size everywhere they appear. `.eleventy.js`'s
 `responsiveImage` Nunjucks shortcode (wraps `@11ty/eleventy-img`) resizes and
-re-encodes each one to WebP at the specific widths each spot actually needs --
-small for grid-card thumbnails, larger for an article's hero image -- and
-outputs a `srcset`/`sizes`-driven `<img>` so the browser picks the right one.
-Deliberately WebP-only (no JPEG/PNG fallback): the extra format would double
-the generated file count for marginal benefit, given WebP's near-universal
-support and the Cloudflare Pages 20,000-file cap noted above. `og:image`/
+re-encodes each one to a single WebP at the one width that spot actually
+needs -- ~500px for grid-card thumbnails, 1200px for an article's hero image,
+280px for a minister photo -- e.g. a typical ~400 KB upload becomes a ~35 KB
+card thumbnail. One fixed width per call site rather than a `srcset` of
+several is deliberate: nearly all the byte savings here come from WebP +
+right-sizing away from the original's huge dimensions, not from also matching
+every viewport exactly, and each extra width is another generated file
+counting against the Cloudflare Pages 20,000-file cap noted above -- not
+worth it for the marginal extra savings. WebP-only for the same reason (no
+JPEG/PNG fallback): WebP support is effectively universal on the mobile
+browsers this site's WhatsApp-driven audience actually uses. `og:image`/
 `twitter:image` still point at the *original* upload, not an optimized
 variant -- intentional, since social platforms fetch and cache that once
 themselves rather than it being re-downloaded per visitor. Falls back to a
