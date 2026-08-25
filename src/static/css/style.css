@@ -57,11 +57,26 @@ img { max-width: 100%; display: block; }
 .brand-text {
   font-weight: 700;
   font-size: 1.05rem;
+  white-space: nowrap;
 }
 
 .site-nav { display: flex; gap: 20px; font-size: 0.95rem; }
 .site-nav a { text-decoration: none; color: var(--muted); }
 .site-nav a:hover { color: var(--navy); }
+
+@media (max-width: 640px) {
+  .site-header {
+    flex-wrap: wrap;
+    row-gap: 10px;
+    padding: 16px 20px 12px;
+  }
+  .site-nav {
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.88rem;
+  }
+}
 
 .hero-banner {
   max-width: var(--max-width);
