@@ -3,14 +3,32 @@ layout: base.njk
 ogType: article
 ---
 {% from "share-bar.njk" import render as shareBar %}
+{% set articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "headline": title,
+  "image": [site.url + poster],
+  "datePublished": date | isoDate,
+  "author": { "@type": "GovernmentOrganization", "name": site.title },
+  "publisher": {
+    "@type": "GovernmentOrganization",
+    "name": site.title,
+    "logo": { "@type": "ImageObject", "url": site.url + site.logo }
+  },
+  "mainEntityOfPage": { "@type": "WebPage", "@id": site.url + page.url },
+  "description": summary,
+  "articleSection": category,
+  "inLanguage": "ml"
+} %}
+<script type="application/ld+json">{{ articleSchema | dump | safe }}</script>
 <article class="initiative">
   <div class="hero">
     <img class="hero-image" src="{{ poster }}" alt="{{ title }}" loading="eager">
   </div>
 
-  <div class="initiative-body">
+  <div class="initiative-body" lang="ml">
     <div class="initiative-meta">
-      {% if category %}<a class="tag tag-link" href="/category/{{ category | lower }}/">{{ category }}</a>{% endif %}
+      {% if category %}<a class="tag tag-link" href="/category/{{ category | lower }}/" lang="en">{{ category }}</a>{% endif %}
       {% if date %}<time datetime="{{ date | isoDate }}">{{ date | readableDate }}</time>{% endif %}
     </div>
 
@@ -21,6 +39,8 @@ ogType: article
       {{ content | safe }}
     </div>
 
-    {{ shareBar(title, summary, site.url + page.url, site.url + poster, 'initiative', page.fileSlug, site.whatsappChannelPromo) }}
+    <div lang="en">
+      {{ shareBar(title, summary, site.url + page.url, site.url + poster, 'initiative', page.fileSlug, site.whatsappChannelPromo) }}
+    </div>
   </div>
 </article>

@@ -1,0 +1,27 @@
+---
+permalink: /feed.xml
+eleventyExcludeFromCollections: true
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <title>{{ site.title }} — Initiatives &amp; Achievements</title>
+  <link>{{ site.url }}/</link>
+  <atom:link href="{{ site.url }}/feed.xml" rel="self" type="application/rss+xml" />
+  <description>{{ site.tagline }}</description>
+  <language>ml</language>
+  <lastBuildDate>{{ collections.initiatives[0].data.date | rfc822Date }}</lastBuildDate>
+{%- for item in collections.initiatives | slice(0, 30) %}
+  <item>
+    <title>{{ item.data.title }}</title>
+    <link>{{ site.url }}{{ item.url }}</link>
+    <guid isPermaLink="true">{{ site.url }}{{ item.url }}</guid>
+    <pubDate>{{ item.data.date | rfc822Date }}</pubDate>
+    {%- if item.data.category %}
+    <category>{{ item.data.category }}</category>
+    {%- endif %}
+    <description>{{ item.data.summary }}</description>
+  </item>
+{%- endfor %}
+</channel>
+</rss>

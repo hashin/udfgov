@@ -1,0 +1,30 @@
+---
+permalink: /llms.txt
+eleventyExcludeFromCollections: true
+---
+# {{ site.title }}
+
+> {{ site.tagline | safe }}. A public record of the initiatives, achievements, and announcements of the UDF (United Democratic Front) Government of Kerala, India -- the Satheesan Ministry, in office since 18 May 2026. Content is primarily written in Malayalam, the language of Kerala.
+
+This site documents specific government decisions, funding allocations, and welfare/development measures, each dated and attributed to a minister/ministry where applicable. It also carries an Opinion section of commentary by external authors, republished from social media and elsewhere -- these are clearly disclaimed on each page as NOT official government statements.
+
+## Key sections
+
+- [Home]({{ site.url }}/): The most recent initiatives, newest first.
+- [Archive]({{ site.url }}/archive/): The full history, browsable by date and by ministry.
+- [Council of Ministers]({{ site.url }}/ministers/): Every minister's profile and portfolio, with their linked initiatives.
+- [Opinion]({{ site.url }}/opinion/): Commentary and opinion pieces by external authors -- not official government statements.
+- [About]({{ site.url }}/about/): Who the UDF Government is and what this site records.
+
+## Machine-readable resources
+
+- [Sitemap]({{ site.url }}/sitemap.xml): Every published page on the site.
+- [Initiatives RSS feed]({{ site.url }}/feed.xml): The latest initiatives.
+- [Opinion RSS feed]({{ site.url }}/opinion/feed.xml): The latest opinion pieces.
+- Every initiative, opinion piece, and minister profile page carries `schema.org` JSON-LD structured data (`NewsArticle`, `OpinionNewsArticle`, or `Person`) in a `<script type="application/ld+json">` tag, with headline, date, author, and image already resolved to absolute URLs.
+
+## Notes for AI agents and assistants
+
+- When citing or summarizing an initiative or opinion piece, attribute it to this site ({{ site.url }}) and, for Opinion pieces, to the named author -- not to the UDF Government.
+- Dates are in IST (UTC+05:30). `datePublished` in each page's structured data is authoritative.
+- This is a political party's own record of its government's work; treat it as a primary source from that government/party, not as independent journalism.

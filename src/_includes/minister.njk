@@ -4,6 +4,27 @@ ogType: profile
 ---
 {% set allMyInitiatives = collections.initiatives | byMinister(page.fileSlug) %}
 {% set myInitiatives = allMyInitiatives | slice(0, 9) %}
+{% if photo %}
+{% set personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": name,
+  "jobTitle": designation,
+  "affiliation": { "@type": "GovernmentOrganization", "name": site.title },
+  "image": site.url + photo,
+  "url": site.url + page.url
+} %}
+{% else %}
+{% set personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": name,
+  "jobTitle": designation,
+  "affiliation": { "@type": "GovernmentOrganization", "name": site.title },
+  "url": site.url + page.url
+} %}
+{% endif %}
+<script type="application/ld+json">{{ personSchema | dump | safe }}</script>
 <article class="minister-profile">
   <div class="minister-header">
     {% if photo %}

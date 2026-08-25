@@ -1,0 +1,27 @@
+---
+permalink: /opinion/feed.xml
+eleventyExcludeFromCollections: true
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+  <title>{{ site.title }} — Opinion</title>
+  <link>{{ site.url }}/opinion/</link>
+  <atom:link href="{{ site.url }}/opinion/feed.xml" rel="self" type="application/rss+xml" />
+  <description>Opinion pieces and commentary from writers, shared on social media and elsewhere -- not official statements from the UDF Government.</description>
+  <language>ml</language>
+  {%- if collections.opinions.length %}
+  <lastBuildDate>{{ collections.opinions[0].data.date | rfc822Date }}</lastBuildDate>
+  {%- endif %}
+{%- for item in collections.opinions | slice(0, 30) %}
+  <item>
+    <title>{{ item.data.title }}</title>
+    <link>{{ site.url }}{{ item.url }}</link>
+    <guid isPermaLink="true">{{ site.url }}{{ item.url }}</guid>
+    <pubDate>{{ item.data.date | rfc822Date }}</pubDate>
+    <dc:creator>{{ item.data.author }}</dc:creator>
+    <description>{{ item.data.summary }}</description>
+  </item>
+{%- endfor %}
+</channel>
+</rss>

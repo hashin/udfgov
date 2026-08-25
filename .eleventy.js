@@ -102,6 +102,7 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/static": "static" });
   eleventyConfig.addPassthroughCopy({ admin: "admin" });
   eleventyConfig.addPassthroughCopy("src/uploads");
+  eleventyConfig.addPassthroughCopy("src/robots.txt");
 
   eleventyConfig.addCollection("initiatives", (collectionApi) => getPublishedInitiatives(collectionApi));
 
@@ -190,6 +191,14 @@ module.exports = function (eleventyConfig) {
     return DateTime.fromJSDate(new Date(dateObj), { zone: "utc" }).toISODate();
   });
 
+  // RFC-822 date format (e.g. "Tue, 25 Aug 2026 09:00:00 +0000") required by
+  // RSS 2.0's <pubDate>/<lastBuildDate> -- used by src/feed.njk and
+  // src/opinion-feed.njk.
+  eleventyConfig.addFilter("rfc822Date", (dateObj) => {
+    if (!dateObj) return "";
+    return DateTime.fromJSDate(new Date(dateObj), { zone: "utc" }).toRFC2822();
+  });
+
   eleventyConfig.addFilter("initials", (name) => {
     if (!name) return "";
     return name
@@ -205,6 +214,12 @@ module.exports = function (eleventyConfig) {
   });
 
   eleventyConfig.addFilter("slice", (arr, start, end) => (arr || []).slice(start, end));
+
+  // Shallow-merges `extra` onto `obj`, returning a new object -- used to
+  // add an optional key (e.g. JSON-LD's `isBasedOn`) onto a base object
+  // literal built in a template, without writing out two near-duplicate
+  // {% set %} blocks for the "field present" / "field absent" cases.
+  eleventyConfig.addFilter("merge", (obj, extra) => Object.assign({}, obj, extra));
 
   // Builds a "*bold title*\n\nsummary\n\nurl" share message. `summary` and
   // `url` are each optional and omitted (with their separator) when blank —

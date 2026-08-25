@@ -42,6 +42,8 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 
+{% if ogType == "article" %}<meta property="og:locale" content="ml_IN">{% else %}<meta property="og:locale" content="en_IN">{% endif %}
+
 {# Twitter/X card #}
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ title }}">
@@ -51,6 +53,22 @@
 <link rel="canonical" href="{{ site.url }}{{ page.url }}">
 <link rel="icon" href="/static/images/favicon.png">
 <link rel="stylesheet" href="/static/css/style.css">
+<link rel="alternate" type="application/rss+xml" title="{{ site.title }} — Initiatives" href="/feed.xml">
+<link rel="alternate" type="application/rss+xml" title="{{ site.title }} — Opinion" href="/opinion/feed.xml">
+
+{# GovernmentOrganization schema so search engines/AI agents can resolve
+   "UDF Kerala" as an entity on every page, not just the homepage. Built as
+   a Nunjucks object and serialized with `dump` (== JSON.stringify) rather
+   than hand-written JSON so quotes/unicode in any field escape safely. #}
+{% set orgSchema = {
+  "@context": "https://schema.org",
+  "@type": "GovernmentOrganization",
+  "name": site.title,
+  "url": site.url,
+  "logo": site.url + site.logo,
+  "description": site.tagline
+} %}
+<script type="application/ld+json">{{ orgSchema | dump | safe }}</script>
 </head>
 <body>
   <header class="site-header">

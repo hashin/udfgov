@@ -4,20 +4,42 @@ ogType: article
 gaContentType: opinion
 ---
 {% from "share-bar.njk" import render as shareBar %}
+{% set articleBase = {
+  "@context": "https://schema.org",
+  "@type": "OpinionNewsArticle",
+  "headline": title,
+  "image": [site.url + poster],
+  "datePublished": date | isoDate,
+  "author": { "@type": "Person", "name": author },
+  "publisher": {
+    "@type": "GovernmentOrganization",
+    "name": site.title,
+    "logo": { "@type": "ImageObject", "url": site.url + site.logo }
+  },
+  "mainEntityOfPage": { "@type": "WebPage", "@id": site.url + page.url },
+  "description": summary,
+  "inLanguage": "ml"
+} %}
+{% if sourceUrl %}
+  {% set articleSchema = articleBase | merge({ "isBasedOn": sourceUrl }) %}
+{% else %}
+  {% set articleSchema = articleBase %}
+{% endif %}
+<script type="application/ld+json">{{ articleSchema | dump | safe }}</script>
 <article class="initiative opinion">
   <div class="hero">
     <img class="hero-image" src="{{ poster }}" alt="{{ title }}" loading="eager">
   </div>
 
-  <div class="initiative-body">
-    <div class="initiative-meta">
+  <div class="initiative-body" lang="ml">
+    <div class="initiative-meta" lang="en">
       <span class="tag tag-opinion">Opinion</span>
       {% if date %}<time datetime="{{ date | isoDate }}">{{ date | readableDate }}</time>{% endif %}
     </div>
 
     <h1>{{ title }}</h1>
 
-    <p class="opinion-byline">
+    <p class="opinion-byline" lang="en">
       By <strong>{{ author }}</strong>{% if authorHandle %} &middot; {{ authorHandle }}{% endif %}
       {% if sourcePlatform or sourceUrl %}
         <br>
@@ -27,12 +49,14 @@ gaContentType: opinion
 
     {% if summary %}<p class="lede">{{ summary }}</p>{% endif %}
 
-    <p class="opinion-disclaimer">This is an opinion piece by an external author, shared here for readers -- it does not represent an official statement or position of the UDF Government of Kerala.</p>
+    <p class="opinion-disclaimer" lang="en">This is an opinion piece by an external author, shared here for readers -- it does not represent an official statement or position of the UDF Government of Kerala.</p>
 
     <div class="prose">
       {{ content | safe }}
     </div>
 
-    {{ shareBar(title, summary, site.url + page.url, site.url + poster, 'opinion', page.fileSlug, site.whatsappChannelPromo) }}
+    <div lang="en">
+      {{ shareBar(title, summary, site.url + page.url, site.url + poster, 'opinion', page.fileSlug, site.whatsappChannelPromo) }}
+    </div>
   </div>
 </article>
